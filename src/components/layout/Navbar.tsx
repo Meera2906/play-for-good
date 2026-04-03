@@ -90,7 +90,7 @@ const Navbar: React.FC = () => {
               <Link to="/login" className="font-display font-bold text-[10px] uppercase tracking-[0.2em] text-on-surface-variant hover:text-primary transition-colors">
                 Log in
               </Link>
-              <Link to="/signup" className="bg-gradient-to-br from-primary to-primary-container text-background font-bold px-10 py-4 rounded-full text-[10px] uppercase tracking-[0.2em] hover:scale-105 transition-all shadow-lg shadow-primary/20 active:scale-95">
+              <Link to="/signup" className="bg-gradient-to-br from-primary to-primary-container text-background font-bold px-10 py-4 rounded-full text-[10px] uppercase tracking-[0.2em] hover:scale-105 transition-all shadow-lg shadow-primary/20 active:scale-95 animate-glow-breathing">
                 Join Now
               </Link>
             </div>
