@@ -99,3 +99,13 @@ export interface UserSubscription {
   stripe_subscription_id?: string;
   created_at: string;
 }
+
+export interface Donation {
+  id: string;
+  user_id: string;
+  charity_id: string;
+  subscription_id: string | null;
+  amount: number;
+  donation_type: 'independent' | 'subscription_share';
+  created_at: string;
+}

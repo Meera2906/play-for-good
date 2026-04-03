@@ -50,14 +50,106 @@ const Home: React.FC = () => {
     <div className="flex flex-col bg-background">
       {/* Hero Section */}
       <section className="relative min-h-[921px] flex items-center px-6 md:px-12 overflow-hidden">
-        {/* ... Hero Content ... */}
+        <div className="absolute inset-0 z-0 opacity-10">
+          <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary blur-[160px] rounded-full -translate-y-1/2 translate-x-1/3 animate-pulse" />
+          <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-secondary blur-[160px] rounded-full translate-y-1/3 -translate-x-1/4" />
+        </div>
+        
+        <div className="relative z-10 max-w-[1920px] mx-auto w-full">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+            className="flex flex-col gap-10"
+          >
+            <div className="inline-flex items-center gap-4 px-6 py-2 rounded-full border border-white/5 bg-white/5 backdrop-blur-md w-fit">
+              <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+              <span className="font-sans text-[10px] font-bold uppercase tracking-[0.3em] text-on-surface-variant">The Matrix is Synchronized</span>
+            </div>
+            
+            <h1 className="font-display text-7xl md:text-[160px] leading-[0.85] font-black uppercase tracking-tighter max-w-6xl">
+              Sovereign <br/>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-on-surface to-secondary-container italic">Catalyst.</span>
+            </h1>
+            
+            <p className="font-sans text-lg md:text-2xl text-on-surface-variant max-w-2xl leading-relaxed">
+              Achieve absolute precision. Your performance metrics translated into immediate, verifiable global impact. 
+              Join the elite circle of change.
+            </p>
+            
+            <div className="flex flex-col md:flex-row items-center gap-8 mt-4">
+              <Link to="/signup" className="group relative px-12 py-6 rounded-full bg-white text-background font-bold text-lg uppercase tracking-widest overflow-hidden hover:scale-105 transition-all active:scale-95 shadow-2xl shadow-white/10">
+                <span className="relative z-10">Initialize Flow</span>
+                <div className="absolute inset-0 bg-primary translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+              </Link>
+              <Link to="/charities" className="text-on-surface-variant hover:text-white font-bold uppercase tracking-[0.3em] text-xs transition-colors flex items-center gap-4 group">
+                Explore Charities
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
+              </Link>
+            </div>
+          </motion.div>
+        </div>
       </section>
 
       {/* Trust Stats */}
-      {/* ... Trust Stats Content ... */}
+      <section className="py-24 px-6 md:px-12 border-y border-white/5 bg-surface-container-lowest">
+        <div className="max-w-[1920px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 text-center md:text-left">
+          <div className="space-y-2">
+            <p className="font-display text-5xl font-black text-secondary tracking-tighter">£2.4M</p>
+            <p className="font-sans text-sm uppercase tracking-widest text-on-surface-variant">Donated to Global Causes</p>
+          </div>
+          <div className="space-y-2">
+            <p className="font-display text-5xl font-black text-primary tracking-tighter">15k+</p>
+            <p className="font-sans text-sm uppercase tracking-widest text-on-surface-variant">Active Elite Members</p>
+          </div>
+          <div className="space-y-2">
+            <p className="font-display text-5xl font-black text-on-surface tracking-tighter">250+</p>
+            <p className="font-sans text-sm uppercase tracking-widest text-on-surface-variant">Vetted Charity Partners</p>
+          </div>
+        </div>
+      </section>
 
       {/* How it Works */}
-      {/* ... How it Works Content ... */}
+      <section className="py-32 px-6 md:px-12 max-w-[1920px] mx-auto">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-24 gap-8">
+          <div className="max-w-2xl">
+            <h2 className="font-display text-5xl md:text-6xl font-extrabold tracking-tight mb-6 uppercase">Master the Circle</h2>
+            <p className="font-sans text-on-surface-variant text-lg">A seamless orchestration of skill and generosity, designed for those who demand excellence in every action.</p>
+          </div>
+          <span className="hidden md:block font-display text-9xl font-black text-white/5 pointer-events-none uppercase tracking-tighter">PROCESS</span>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {[
+            { id: '01', title: 'Subscribe', desc: 'Choose your tier of impact. From Monthly to Sovereign Yearly, every membership fuels the engine of change.' },
+            { id: '02', title: 'Add Scores', desc: 'Log your achievements. Our precise tracking system validates your prowess against the elite global field.', delay: 0.1, mt: true },
+            { id: '03', title: 'Enter Monthly Draw', desc: 'Your skill translates into participation. Monthly draws reward the most consistent catalysts.', delay: 0.2 },
+            { id: '04', title: 'Support & Win', desc: 'Experience the dual thrill of personal victory and tangible global contribution. Elevate yourself by elevating others.', delay: 0.3, mt: true, highlight: true }
+          ].map((step) => (
+            <motion.div 
+              key={step.id}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: step.delay }}
+              className={cn(
+                "p-10 rounded-[2rem] transition-colors group",
+                step.highlight ? "bg-surface-container-high border-t-2 border-primary/20" : "bg-surface-container-low hover:bg-surface-container",
+                step.mt && "md:mt-12"
+              )}
+            >
+              <span className={cn(
+                "font-display text-4xl font-black transition-colors",
+                step.highlight ? "text-secondary" : "text-primary/30 group-hover:text-primary"
+              )}>
+                {step.id}
+              </span>
+              <h3 className="font-display text-2xl font-bold mt-12 mb-4 uppercase">{step.title}</h3>
+              <p className="text-on-surface-variant leading-relaxed">{step.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+      </section>
 
       {/* Impact Matrix */}
       <section className="py-32 px-6 md:px-12 bg-surface-container-lowest relative overflow-hidden">

@@ -8,6 +8,7 @@ import { useSubscription } from '../../hooks/useSubscription';
 import { cn, formatCurrency } from '../../lib/utils';
 import EmptyState from '../../components/ui/EmptyState';
 import type { Charity } from '../../types';
+import DonationModal from '../../components/charity/DonationModal';
 
 const CharitySelection: React.FC = () => {
   const { user, profile } = useAuth();
@@ -16,6 +17,7 @@ const CharitySelection: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
 
   // States for user selection
   const [selectedCharityId, setSelectedCharityId] = useState<string | null>(null);
@@ -76,7 +78,16 @@ const CharitySelection: React.FC = () => {
   const selectedCharity = charities.find(c => c.id === selectedCharityId);
 
   return (
-    <div className="max-w-[1600px] mx-auto p-12">
+    <>
+      {selectedCharity && (
+        <DonationModal 
+          isOpen={isDonationModalOpen}
+          onClose={() => setIsDonationModalOpen(false)}
+          charity={selectedCharity}
+        />
+      )}
+
+      <div className="max-w-[1600px] mx-auto p-12">
       {!isActive && (
         <div className="mb-12 p-6 bg-secondary/10 border border-secondary/30 rounded-[2rem] flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex items-center gap-6">
@@ -236,18 +247,30 @@ const CharitySelection: React.FC = () => {
               </button>
             </div>
             
-            <div className="glass-card p-6 flex items-center gap-4 bg-gradient-to-r from-surface-container-high to-background">
-              <div className="w-10 h-10 bg-secondary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                <Zap className="w-5 h-5 text-secondary" />
+            <div className="glass-card p-8 bg-surface-container-high/20 border-white/5 space-y-6">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-secondary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Zap className="w-5 h-5 text-secondary" />
+                </div>
+                <div>
+                  <p className="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant">Lifetime Impact</p>
+                  <p className="text-xl font-display font-black text-primary">{formatCurrency(profile?.total_impact || 0)}</p>
+                </div>
               </div>
-              <p className="text-xs text-on-surface-variant leading-relaxed">
-                Your total lifetime impact: <strong className="text-primary">{formatCurrency(profile?.total_impact || 0)}</strong>
-              </p>
+              
+              <button 
+                onClick={() => setIsDonationModalOpen(true)}
+                disabled={!selectedCharityId}
+                className="w-full py-4 rounded-xl border border-white/5 hover:bg-white/5 text-[10px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-3 disabled:opacity-30"
+              >
+                <Heart className="w-4 h-4 text-primary" /> One-time Contribution
+              </button>
+            </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

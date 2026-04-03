@@ -11,6 +11,7 @@ import { useAuth } from '../components/auth/AuthProvider';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { cn, formatCurrency } from '../lib/utils';
 import type { Charity } from '../types';
+import DonationModal from '../components/charity/DonationModal';
 
 const CharityDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -20,6 +21,7 @@ const CharityDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selecting, setSelecting] = useState(false);
   const [error, setError] = useState(false);
+  const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
 
   useEffect(() => {
     if (slug) {
@@ -107,7 +109,14 @@ const CharityDetail: React.FC = () => {
   const events = charity.upcoming_events || [];
 
   return (
-    <div className="min-h-screen bg-background pb-32">
+    <>
+      <DonationModal 
+        isOpen={isDonationModalOpen}
+        onClose={() => setIsDonationModalOpen(false)}
+        charity={charity}
+      />
+
+      <div className="min-h-screen bg-background pb-32">
       {/* Hero Section */}
       <section className="relative h-[60vh] min-h-[500px] overflow-hidden">
         <div className="absolute inset-0">
@@ -160,24 +169,32 @@ const CharityDetail: React.FC = () => {
                     {formatCurrency(charity.total_raised)}
                   </p>
                 </div>
-                <button 
-                  onClick={handleSupport}
-                  disabled={isSelected || selecting}
-                  className={cn(
-                    "px-12 py-6 rounded-full flex items-center gap-4 font-bold uppercase tracking-[0.2em] text-xs transition-all shadow-2xl",
-                    isSelected 
-                      ? "bg-secondary/20 border border-secondary/40 text-secondary cursor-default shadow-secondary/10" 
-                      : "bg-primary text-background hover:scale-105 active:scale-95 shadow-primary/20"
-                  )}
-                >
-                  {selecting ? (
-                    <><Loader2 className="w-5 h-5 animate-spin" /> Processing</>
-                  ) : isSelected ? (
-                    <><CheckCircle2 className="w-5 h-5" /> Currently Supporting</>
-                  ) : (
-                    <><Zap className="w-5 h-5" /> {user ? 'Commit Support' : 'Join to Support'}</>
-                  )}
-                </button>
+                <div className="flex flex-col md:flex-row gap-4">
+                  <button 
+                    onClick={() => setIsDonationModalOpen(true)}
+                    className="px-8 py-6 rounded-full border border-white/10 hover:bg-white/5 font-bold uppercase tracking-[0.2em] text-[10px] transition-all flex items-center gap-3 active:scale-95 shadow-xl shadow-black/20"
+                  >
+                    <Heart className="w-4 h-4 text-primary" /> One-time Donation
+                  </button>
+                  <button 
+                    onClick={handleSupport}
+                    disabled={isSelected || selecting}
+                    className={cn(
+                      "px-12 py-6 rounded-full flex items-center gap-4 font-bold uppercase tracking-[0.2em] text-xs transition-all shadow-2xl",
+                      isSelected 
+                        ? "bg-secondary/20 border border-secondary/40 text-secondary cursor-default shadow-secondary/10" 
+                        : "bg-primary text-background hover:scale-105 active:scale-95 shadow-primary/20"
+                    )}
+                  >
+                    {selecting ? (
+                      <><Loader2 className="w-5 h-5 animate-spin" /> Processing</>
+                    ) : isSelected ? (
+                      <><CheckCircle2 className="w-5 h-5" /> Currently Supporting</>
+                    ) : (
+                      <><Zap className="w-5 h-5" /> {user ? 'Commit Support' : 'Join to Support'}</>
+                    )}
+                  </button>
+                </div>
               </div>
             </motion.div>
           </div>
@@ -321,6 +338,7 @@ const CharityDetail: React.FC = () => {
         </div>
       </section>
     </div>
+    </>
   );
 };
 

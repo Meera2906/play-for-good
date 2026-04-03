@@ -22,6 +22,7 @@ const DashboardOverview: React.FC = () => {
   const [charities, setCharities] = useState<Charity[]>([]);
   const [latestDraw, setLatestDraw] = useState<any>(null);
   const [latestEntry, setLatestEntry] = useState<any>(null);
+  const [featuredCharities, setFeaturedCharities] = useState<Charity[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -76,6 +77,14 @@ const DashboardOverview: React.FC = () => {
           .maybeSingle();
         setLatestEntry(entryData);
       }
+
+      // 5. Fetch featured charities for discovery
+      const { data: featuredData } = await supabase
+        .from('charities')
+        .select('*')
+        .eq('featured', true)
+        .limit(3);
+      setFeaturedCharities(featuredData || []);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
@@ -141,7 +150,8 @@ const DashboardOverview: React.FC = () => {
   }
 
   return (
-    <div className="max-w-[1600px] mx-auto p-12">
+    <>
+      <div className="max-w-[1600px] mx-auto p-12">
       {/* Header */}
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12 mb-20">
             <div className="max-w-3xl">
@@ -461,25 +471,59 @@ const DashboardOverview: React.FC = () => {
                 </p>
               </div>
             </div>
-
-            {/* Quick Actions */}
-            <div className="grid grid-cols-2 gap-6">
-              <button className="glass-card p-8 flex flex-col items-center gap-4 hover:bg-surface-container-low transition-all active:scale-95 group">
-                <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <TrendingUp className="w-6 h-6 text-primary" />
-                </div>
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant">Analytics</span>
-              </button>
-              <button className="glass-card p-8 flex flex-col items-center gap-4 hover:bg-surface-container-low transition-all active:scale-95 group">
-                <div className="w-12 h-12 bg-secondary/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Award className="w-6 h-6 text-secondary" />
-                </div>
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant">Rewards</span>
-              </button>
-            </div>
           </div>
         </div>
-    </div>
+
+        {/* Discover New Impact Section */}
+        <section className="mt-32">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-8 px-2">
+            <div>
+              <h2 className="text-4xl font-display font-black uppercase tracking-tight mb-4">Discover New Impact</h2>
+              <p className="text-on-surface-variant text-sm font-sans max-w-xl">
+                Explore these hand-selected partners pushing the boundaries of global change. Your next performance could be their breakthrough.
+              </p>
+            </div>
+            <Link to="/charities" className="text-primary font-bold uppercase tracking-widest text-[10px] flex items-center gap-3 hover:gap-5 transition-all">
+              View All Partners <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {featuredCharities.map((charity, idx) => (
+              <motion.div 
+                key={charity.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                whileHover={{ y: -10 }}
+                className="glass-card p-1 rounded-[2.5rem]"
+              >
+                <Link to={`/charities/${charity.slug}`} className="bg-background rounded-[2.4rem] overflow-hidden block h-full group">
+                  <div className="h-48 overflow-hidden relative">
+                    <img 
+                      src={charity.image_url || charity.logo_url} 
+                      alt={charity.name} 
+                      className="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700" 
+                      referrerPolicy="no-referrer" 
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-60" />
+                  </div>
+                  <div className="p-8">
+                    <span className="font-sans text-[10px] font-bold text-secondary uppercase tracking-widest">{charity.category}</span>
+                    <h4 className="font-display text-xl font-bold mt-3 mb-2 uppercase tracking-tight">{charity.name}</h4>
+                    <p className="text-on-surface-variant text-xs mb-6 line-clamp-2 leading-relaxed">{charity.description}</p>
+                    <div className="flex items-center gap-3 py-4 border-t border-white/5">
+                      <Heart className="w-5 h-5 text-primary" />
+                      <p className="font-display font-bold text-lg">{formatCurrency(charity.total_raised)} RAISED</p>
+                    </div>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+      </div>
+    </>
   );
 };
 
