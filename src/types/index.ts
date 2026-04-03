@@ -38,18 +38,37 @@ export interface Score {
 
 export interface Draw {
   id: string;
-  month: string; // YYYY-MM
+  draw_month: string; // YYYY-MM
+  draw_year: string; // YYYY
+  draw_mode: 'random' | 'algorithmic';
+  winning_numbers: number[];
   prize_pool: number;
-  winners: Winner[];
+  jackpot_rollover_amount: number;
   status: 'pending' | 'published';
+  winners: Winner[];
+  published_at?: string;
   created_at: string;
+}
+
+export interface DrawEntry {
+  id: string;
+  draw_id: string;
+  user_id: string;
+  entry_numbers: number[];
+  match_count: number;
+  prize_amount: number;
+  winner_status: 'none' | 'pending' | 'approved' | 'rejected';
+  created_at: string;
+  draw?: Draw;
+  user?: Profile;
 }
 
 export interface Winner {
   user_id: string;
   user_name: string;
   prize_amount: number;
-  rank: number;
+  match_count: number;
+  rank?: number;
 }
 
 export interface SubscriptionPlan {

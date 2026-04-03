@@ -41,6 +41,11 @@ CREATE POLICY "Users can update their own subscription"
     USING (auth.uid() = user_id)
     WITH CHECK (auth.uid() = user_id);
 
+-- Admin viewing policy
+CREATE POLICY "Admins can view all subscriptions" 
+    ON public.subscriptions FOR SELECT 
+    USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin'));
+
 -- Winners logic (Service role context)
 CREATE POLICY "Service role can do everything"
     ON public.subscriptions

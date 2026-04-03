@@ -17,6 +17,8 @@ const DashboardOverview: React.FC = () => {
   const { subscription, isActive, loading: subLoading } = useSubscription();
   const [scores, setScores] = useState<Score[]>([]);
   const [charities, setCharities] = useState<Charity[]>([]);
+  const [latestDraw, setLatestDraw] = useState<any>(null);
+  const [latestEntry, setLatestEntry] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -33,7 +35,7 @@ const DashboardOverview: React.FC = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch scores
+      // 1. Fetch scores
       const { data: scoreData } = await supabase
         .from('scores')
         .select('*')
@@ -43,12 +45,34 @@ const DashboardOverview: React.FC = () => {
       
       setScores(scoreData || []);
 
-      // Fetch charities
+      // 2. Fetch charities
       const { data: charityData } = await supabase
         .from('charities')
         .select('*');
       
       setCharities(charityData || []);
+
+      // 3. Fetch latest published draw
+      const { data: drawData } = await supabase
+        .from('draws')
+        .select('*')
+        .eq('status', 'published')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      setLatestDraw(drawData);
+
+      // 4. Fetch user's entry for this draw
+      if (drawData) {
+        const { data: entryData } = await supabase
+          .from('draw_entries')
+          .select('*')
+          .eq('draw_id', drawData.id)
+          .eq('user_id', user?.id)
+          .maybeSingle();
+        setLatestEntry(entryData);
+      }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
@@ -66,8 +90,8 @@ const DashboardOverview: React.FC = () => {
     }
 
     const points = parseInt(newScore.points);
-    if (isNaN(points) || points < 1 || points > 45) {
-      setMessage({ type: 'error', text: 'Points must be between 1 and 45' });
+    if (isNaN(points) || points < 1 || points > 50) {
+      setMessage({ type: 'error', text: 'Points must be between 1 and 50' });
       return;
     }
 
@@ -135,15 +159,15 @@ const DashboardOverview: React.FC = () => {
                 <div className="flex items-center gap-4 bg-surface-container-low px-6 py-3 rounded-2xl border border-white/5 shadow-xl">
                   <Calendar className="w-5 h-5 text-primary" />
                   <div className="flex flex-col">
-                    <span className="text-[8px] font-bold uppercase tracking-widest text-on-surface-variant">Next Draw</span>
-                    <span className="text-xs font-display font-bold uppercase">April 30, 2026</span>
+                    <span className="text-[8px] font-bold uppercase tracking-widest text-on-surface-variant">Active Draw</span>
+                    <span className="text-xs font-display font-bold uppercase">{latestDraw?.draw_month || 'TBA'}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 bg-surface-container-low px-6 py-3 rounded-2xl border border-white/5 shadow-xl">
                   <Trophy className="w-5 h-5 text-secondary" />
                   <div className="flex flex-col">
                     <span className="text-[8px] font-bold uppercase tracking-widest text-on-surface-variant">Prize Pool</span>
-                    <span className="text-xs font-display font-bold uppercase text-secondary">£245,000</span>
+                    <span className="text-xs font-display font-bold uppercase text-secondary">{latestDraw ? formatCurrency(latestDraw.prize_pool) : '£---,---'}</span>
                   </div>
                 </div>
               </div>
@@ -186,22 +210,38 @@ const DashboardOverview: React.FC = () => {
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-4">Your Winning Numbers</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-4">Your Matrix Numbers</p>
                       <div className="flex gap-3">
-                        {isActive ? [12, 24, 35, 41].map(n => (
-                          <div key={n} className="w-12 h-12 bg-surface-container-low border border-white/5 rounded-xl flex items-center justify-center font-display font-bold text-lg hover:border-primary/30 transition-colors">
-                            {n}
-                          </div>
-                        )) : (
+                        {latestEntry ? (
+                          latestEntry.entry_numbers.map((n: number, i: number) => (
+                            <div key={i} className="w-12 h-12 bg-surface-container-low border border-white/5 rounded-xl flex items-center justify-center font-display font-bold text-lg hover:border-primary/30 transition-colors">
+                              {n}
+                            </div>
+                          ))
+                        ) : (
                           <div className="flex items-center gap-2 text-on-surface-variant text-[10px] font-bold uppercase tracking-widest px-4 py-3 bg-white/5 rounded-xl border border-dashed border-white/10">
-                            <Lock className="w-3 h-3" /> Subscription Required
+                            {isActive ? 'Entry Pending Next Draw' : <><Lock className="w-3 h-3" /> Subscription Required</>}
                           </div>
                         )}
                       </div>
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-4">Lifetime Winnings</p>
-                      <p className="text-4xl font-display font-black text-secondary tracking-tighter">{formatCurrency(profile?.lifetime_winnings || 0)}</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-4">Latest Result</p>
+                      {latestEntry ? (
+                        <div className="flex items-center gap-3">
+                           <span className={cn(
+                            "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border",
+                            latestEntry.match_count > 0 ? "bg-primary/20 border-primary/30 text-primary" : "bg-white/5 border-white/10 text-on-surface-variant"
+                          )}>
+                            {latestEntry.match_count} Match
+                          </span>
+                          {latestEntry.prize_amount > 0 && (
+                            <span className="text-xl font-display font-bold text-secondary">+{formatCurrency(latestEntry.prize_amount)}</span>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-xs opacity-40 italic">Waiting for official protocol...</p>
+                      )}
                     </div>
                     <div>
                       <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-4">Charity Impact</p>
@@ -286,11 +326,11 @@ const DashboardOverview: React.FC = () => {
 
                     <form onSubmit={handleScoreSubmit} className="space-y-6">
                       <div className="space-y-3">
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-2">Stableford Points (1-45)</label>
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-2">Stableford Points (1-50)</label>
                         <input 
                           type="number" 
                           min="1" 
-                          max="45"
+                          max="50"
                           value={newScore.points}
                           onChange={(e) => setNewScore({...newScore, points: e.target.value})}
                           placeholder="e.g. 38"
