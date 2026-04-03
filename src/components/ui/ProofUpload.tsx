@@ -5,10 +5,11 @@ import { useAuth } from '../auth/AuthProvider';
 
 interface ProofUploadProps {
   drawId: string;
+  entryId?: string;
   onSuccess: () => void;
 }
 
-const ProofUpload: React.FC<ProofUploadProps> = ({ drawId, onSuccess }) => {
+const ProofUpload: React.FC<ProofUploadProps> = ({ drawId, entryId, onSuccess }) => {
   const { user } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -49,17 +50,28 @@ const ProofUpload: React.FC<ProofUploadProps> = ({ drawId, onSuccess }) => {
         .from('winner-proofs')
         .getPublicUrl(filePath);
 
-      // Insert record to winner_proofs (user will need to run the SQL to create this table)
+      // Upsert record to winner_proofs
       const { error: dbError } = await supabase
         .from('winner_proofs')
-        .insert([{
+        .upsert([{
           user_id: user.id,
           draw_id: drawId,
+          ...(entryId ? { draw_entry_id: entryId } : {}),
           file_url: publicUrl,
           status: 'pending'
-        }]);
+        }], { onConflict: 'user_id,draw_id' });
 
       if (dbError) throw dbError;
+
+      // Update draw_entries winner_status
+      const { error: entryError } = await supabase
+        .from('draw_entries')
+        .update({ winner_status: 'pending_verification' })
+        .eq('user_id', user.id)
+        .eq('draw_id', drawId)
+        .in('winner_status', ['pending', 'rejected']);
+
+      if (entryError) throw entryError;
 
       onSuccess();
     } catch (err: any) {

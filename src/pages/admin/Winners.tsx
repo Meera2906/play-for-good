@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Award, CheckCircle2, XCircle, Clock, Link as LinkIcon, Loader2 } from 'lucide-react';
+import { Award, CheckCircle2, XCircle, Clock, Link as LinkIcon, Loader2, DollarSign } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { formatDate } from '../../lib/utils';
+import { formatDate, cn } from '../../lib/utils';
 
 type WinnerProof = {
   id: string;
@@ -11,6 +11,7 @@ type WinnerProof = {
   file_url: string;
   status: 'pending' | 'approved' | 'rejected';
   created_at: string;
+  actual_status?: string;
   draw?: { month: string; prize_pool: number };
   user?: { full_name: string; email: string };
 };
@@ -27,15 +28,42 @@ const WinnersVerification: React.FC = () => {
     try {
       const { data, error } = await supabase
         .from('winner_proofs')
-        .select(`
-          *,
-          draw:draws(month, prize_pool),
-          user:profiles(full_name, email)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setProofs(data || []);
+      
+      const userIds = data?.map(d => d.user_id) || [];
+      const drawIds = data?.map(d => d.draw_id) || [];
+      
+      let proofsWithStatus = data || [];
+      
+      if (userIds.length > 0 && drawIds.length > 0) {
+        const [
+          { data: entries },
+          { data: profiles },
+          { data: draws }
+        ] = await Promise.all([
+          supabase.from('draw_entries').select('user_id, draw_id, winner_status').in('user_id', userIds).in('draw_id', drawIds),
+          supabase.from('profiles').select('id, full_name, email').in('id', userIds),
+          supabase.from('draws').select('id, month, prize_pool').in('id', drawIds)
+        ]);
+          
+        proofsWithStatus = data?.map(proof => {
+          const entry = entries?.find(e => e.user_id === proof.user_id && e.draw_id === proof.draw_id && e.winner_status !== 'none' && e.winner_status !== 'pending');
+          const dpProfile = profiles?.find(p => p.id === proof.user_id);
+          const dwDraw = draws?.find(d => d.id === proof.draw_id);
+
+          return {
+            ...proof,
+            user: dpProfile,
+            draw: dwDraw,
+            actual_status: entry ? entry.winner_status : proof.status
+          };
+        }) || [];
+      }
+
+      setProofs(proofsWithStatus);
     } catch (err: any) {
       console.error('Error fetching proofs:', err);
     } finally {
@@ -43,14 +71,30 @@ const WinnersVerification: React.FC = () => {
     }
   };
 
-  const updateProofStatus = async (id: string, status: 'approved' | 'rejected') => {
+  const updateProofStatus = async (proof: WinnerProof, newStatus: 'approved' | 'rejected' | 'paid') => {
     try {
-      const { error } = await supabase
-        .from('winner_proofs')
-        .update({ status })
-        .eq('id', id);
+      if (newStatus !== 'paid') {
+        const { error } = await supabase
+          .from('winner_proofs')
+          .update({ status: newStatus })
+          .eq('id', proof.id);
+        if (error) throw error;
+      }
+      
+      // Update draw_entries
+      const updateData: any = { winner_status: newStatus };
+      if (newStatus === 'paid') {
+        updateData.paid_at = new Date().toISOString();
+      }
+      
+      const { error: entryError } = await supabase
+        .from('draw_entries')
+        .update(updateData)
+        .eq('user_id', proof.user_id)
+        .eq('draw_id', proof.draw_id);
+        
+      if (entryError) throw entryError;
 
-      if (error) throw error;
       fetchProofs();
     } catch (err) {
       console.error('Failed to update proof status:', err);
@@ -117,13 +161,13 @@ const WinnersVerification: React.FC = () => {
                 
                 <div className="mt-auto flex gap-4">
                   <button 
-                    onClick={() => updateProofStatus(proof.id, 'approved')}
+                    onClick={() => updateProofStatus(proof, 'approved')}
                     className="flex-1 py-3 rounded-xl bg-primary text-background font-bold uppercase tracking-[0.2em] text-[10px] transition-all hover:bg-primary/90 flex flex-col items-center justify-center gap-1"
                   >
                     <CheckCircle2 className="w-4 h-4" /> Approve
                   </button>
                   <button 
-                    onClick={() => updateProofStatus(proof.id, 'rejected')}
+                    onClick={() => updateProofStatus(proof, 'rejected')}
                     className="flex-1 py-3 rounded-xl bg-surface-container-highest border border-red-500/30 text-red-500 font-bold uppercase tracking-[0.2em] text-[10px] transition-all hover:bg-red-500/10 flex flex-col items-center justify-center gap-1"
                   >
                     <XCircle className="w-4 h-4" /> Reject
@@ -147,6 +191,7 @@ const WinnersVerification: React.FC = () => {
               <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant">Draw</th>
               <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant">Status</th>
               <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant text-right">Date</th>
+              <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant text-right">Action</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
@@ -162,19 +207,31 @@ const WinnersVerification: React.FC = () => {
                 <td className="px-8 py-6">
                   <span className={cn(
                     "text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-[0.2em] border",
-                    proof.status === 'approved' ? "bg-primary/10 text-primary border-primary/20" : "bg-red-500/10 text-red-500 border-red-500/20"
+                    proof.actual_status === 'approved' ? "bg-primary/10 text-primary border-primary/20" : 
+                    proof.actual_status === 'paid' ? "bg-secondary/10 text-secondary border-secondary/20" :
+                    "bg-red-500/10 text-red-500 border-red-500/20"
                   )}>
-                    {proof.status}
+                    {proof.actual_status === 'pending_verification' ? 'pending' : (proof.actual_status || proof.status)}
                   </span>
                 </td>
                 <td className="px-8 py-6 text-right">
                   <p className="text-sm font-sans text-on-surface-variant">{formatDate(proof.created_at)}</p>
                 </td>
+                <td className="px-8 py-6 text-right">
+                  {proof.actual_status === 'approved' && (
+                    <button
+                      onClick={() => updateProofStatus(proof, 'paid')}
+                      className="px-4 py-2 rounded-lg bg-secondary/20 text-secondary border border-secondary/30 hover:bg-secondary/30 transition-all text-[10px] font-bold uppercase tracking-wider inline-flex items-center gap-2"
+                    >
+                      <DollarSign className="w-3 h-3" /> Mark Paid
+                    </button>
+                  )}
+                </td>
               </tr>
             ))}
             {processedProofs.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-8 py-12 text-center text-sm text-on-surface-variant">
+                <td colSpan={5} className="px-8 py-12 text-center text-sm text-on-surface-variant">
                   No previous verifications logged.
                 </td>
               </tr>

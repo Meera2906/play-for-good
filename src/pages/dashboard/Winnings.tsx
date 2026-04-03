@@ -186,7 +186,17 @@ const Winnings: React.FC = () => {
                 {entry.prize_amount > 0 && (
                   <div className="bg-surface-container-high/30 p-10 w-full lg:w-[400px] flex-shrink-0 relative z-10 flex flex-col justify-center">
                     {entry.winner_status === 'pending' ? (
-                      <ProofUpload drawId={entry.draw_id} onSuccess={fetchEntries} />
+                      <ProofUpload drawId={entry.draw_id} entryId={entry.id} onSuccess={fetchEntries} />
+                    ) : entry.winner_status === 'pending_verification' ? (
+                      <div className="text-center w-full">
+                        <div className="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+                          <Clock className="w-8 h-8 text-secondary" />
+                        </div>
+                        <h4 className="font-bold text-lg text-secondary mb-2">Under Review</h4>
+                        <p className="text-xs text-on-surface-variant max-w-[250px] mx-auto text-balance">
+                          Your scorecard is being verified by the review team. Please allow 1-2 business days.
+                        </p>
+                      </div>
                     ) : entry.winner_status === 'approved' ? (
                       <div className="text-center w-full">
                         <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 shadow-[0_0_20px_rgba(78,222,163,0.3)]">
@@ -194,7 +204,17 @@ const Winnings: React.FC = () => {
                         </div>
                         <h4 className="font-bold text-lg text-primary mb-2">Claim Verified</h4>
                         <p className="text-xs text-on-surface-variant max-w-[250px] mx-auto text-balance">
-                          Payout sequence initiated. Funds credited to your entity profile.
+                          Payout sequence initiated. Funds will be credited to your entity profile shortly.
+                        </p>
+                      </div>
+                    ) : entry.winner_status === 'paid' ? (
+                      <div className="text-center w-full">
+                        <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-primary/30">
+                          <CheckCircle2 className="w-8 h-8 text-primary" />
+                        </div>
+                        <h4 className="font-bold text-lg text-primary mb-2 uppercase tracking-widest">Paid Response</h4>
+                        <p className="text-xs text-on-surface-variant max-w-[250px] mx-auto text-balance">
+                          Reward successfully disbursed to your designated account. {entry.paid_at && `Processed on ${formatDate(entry.paid_at)}`}
                         </p>
                       </div>
                     ) : entry.winner_status === 'rejected' ? (
@@ -204,7 +224,7 @@ const Winnings: React.FC = () => {
                         <p className="text-xs text-on-surface-variant max-w-[250px] mx-auto text-balance mb-4">
                           Scorecard verification failed. Please upload a clear image of your official club record.
                         </p>
-                        <ProofUpload drawId={entry.draw_id} onSuccess={fetchEntries} />
+                        <ProofUpload drawId={entry.draw_id} entryId={entry.id} onSuccess={fetchEntries} />
                       </div>
                     ) : null}
                   </div>
