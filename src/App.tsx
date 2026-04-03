@@ -11,6 +11,7 @@ import HowItWorks from './pages/HowItWorks';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import DashboardLayout from './pages/dashboard/DashboardLayout';
+import Onboarding from './pages/Onboarding';
 import DashboardOverview from './pages/dashboard/DashboardOverview';
 import Scores from './pages/dashboard/Scores';
 import Charity from './pages/dashboard/Charity';
@@ -24,7 +25,7 @@ import AdminCharities from './pages/admin/Charities';
 import AdminDraws from './pages/admin/Draws';
 import AdminWinners from './pages/admin/Winners';
 import AdminAnalytics from './pages/admin/Analytics';
-import SubscriptionsPage from './pages/admin/Subscriptions.tsx';
+import SubscriptionsPage from './pages/admin/Subscriptions';
 import Leaderboard from './pages/Leaderboard';
 
 import Profile from './pages/dashboard/Profile';
@@ -50,6 +51,11 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; adminOnly?: boolean 
   if (adminOnly && profile?.role !== 'admin') {
     return <Navigate to="/dashboard" replace />;
   }
+  
+  // Force onboarding if not completed and not already on onboarding page
+  if (profile && !profile.onboarding_completed && location.pathname !== '/onboarding' && profile.role !== 'admin') {
+    return <Navigate to="/onboarding" replace />;
+  }
 
   return <>{children}</>;
 };
@@ -61,7 +67,18 @@ const AuthCheck: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   if (loading) return null;
 
   if (user) {
-    const from = (location.state as any)?.from?.pathname || (profile?.role === 'admin' ? '/admin' : '/dashboard');
+    let from = (location.state as any)?.from?.pathname;
+    
+    if (!from) {
+      if (profile?.role === 'admin') {
+        from = '/admin';
+      } else if (profile && !profile.onboarding_completed) {
+        from = '/onboarding';
+      } else {
+        from = '/dashboard';
+      }
+    }
+    
     return <Navigate to={from} replace />;
   }
 
@@ -70,7 +87,7 @@ const AuthCheck: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 const AppContent: React.FC = () => {
   const location = useLocation();
-  const isDashboard = location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/admin');
+  const isDashboard = location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/admin') || location.pathname === '/onboarding';
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -91,6 +108,12 @@ const AppContent: React.FC = () => {
             <AuthCheck>
               <Signup />
             </AuthCheck>
+          } />
+          
+          <Route path="/onboarding" element={
+            <ProtectedRoute>
+              <Onboarding />
+            </ProtectedRoute>
           } />
           
           <Route path="/dashboard" element={

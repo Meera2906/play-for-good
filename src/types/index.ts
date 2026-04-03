@@ -13,6 +13,7 @@ export interface Profile extends User {
   subscription_status: 'active' | 'inactive' | 'cancelled' | 'lapsed';
   subscription_tier: 'monthly' | 'yearly' | 'none';
   selected_charity_id?: string;
+  onboarding_completed?: boolean;
   lifetime_winnings: number;
   total_impact: number;
 }

@@ -69,6 +69,7 @@ const Signup: React.FC = () => {
             role: 'user',
             subscription_status: 'inactive',
             subscription_tier: 'none',
+            onboarding_completed: false,
             lifetime_winnings: 0,
             total_impact: 0,
           });
@@ -81,9 +82,9 @@ const Signup: React.FC = () => {
           return;
         }
 
-        // If session exists (auto-login enabled in Supabase), redirect
+        // If session exists (auto-login enabled in Supabase), redirect to onboarding
         if (authData.session) {
-          navigate('/dashboard');
+          navigate('/onboarding');
         } else {
           setSuccess(true);
         }
