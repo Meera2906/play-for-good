@@ -19,7 +19,11 @@ import { useAuth } from '../auth/AuthProvider';
 import { cn } from '../../lib/utils';
 import ProfileChip from '../ui/ProfileChip';
 
-const AdminSidebar: React.FC = () => {
+interface AdminSidebarProps {
+  onNavClick?: () => void;
+}
+
+const AdminSidebar: React.FC<AdminSidebarProps> = ({ onNavClick }) => {
   const location = useLocation();
   const { signOut } = useAuth();
 
@@ -27,6 +31,7 @@ const AdminSidebar: React.FC = () => {
     { icon: ShieldCheck, label: 'Matrix Control', path: '/admin' },
     { icon: Users, label: 'User Matrix', path: '/admin/users' },
     { icon: Heart, label: 'Charities', path: '/admin/charities' },
+    { icon: Database, label: 'Subscriptions', path: '/admin/subscriptions' },
     { icon: Zap, label: 'Draw Engine', path: '/admin/draws' },
     { icon: Award, label: 'Winners & Proofs', path: '/admin/winners' },
     { icon: BarChart3, label: 'Global Analytics', path: '/admin/analytics' },
@@ -38,7 +43,7 @@ const AdminSidebar: React.FC = () => {
     <aside className="w-80 h-screen sticky top-0 bg-surface-container-lowest border-r border-white/5 flex flex-col z-40">
       {/* Logo Section */}
       <div className="p-10 mb-8">
-        <Link to="/" className="flex items-center gap-4 group">
+        <Link to="/" className="flex items-center gap-4 group" onClick={onNavClick}>
           <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-2xl shadow-primary/20 group-hover:rotate-12 transition-transform duration-500">
             <ShieldCheck className="w-7 h-7 text-background" />
           </div>
@@ -62,6 +67,7 @@ const AdminSidebar: React.FC = () => {
           <Link
             key={item.path}
             to={item.path}
+            onClick={onNavClick}
             className={cn(
               "flex items-center justify-between px-6 py-4 rounded-2xl transition-all duration-300 group relative overflow-hidden",
               isActive(item.path) 
@@ -93,21 +99,29 @@ const AdminSidebar: React.FC = () => {
         
         <div className="space-y-2">
           <Link 
-            to="/admin/settings" 
-            className="flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:text-primary transition-colors group"
+            to="/admin/profile" 
+            onClick={onNavClick}
+            className={cn(
+              "flex items-center gap-4 px-6 py-3 rounded-xl transition-all group",
+              isActive('/admin/profile') ? "bg-primary/10 text-primary" : "text-on-surface-variant hover:text-primary hover:bg-white/5"
+            )}
           >
-            <Database className="w-5 h-5 group-hover:scale-110 transition-transform" />
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Database</span>
+            <ShieldCheck className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Admin Identity</span>
           </Link>
           <Link 
             to="/admin/config" 
+            onClick={onNavClick}
             className="flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:text-primary transition-colors group"
           >
             <Settings className="w-5 h-5 group-hover:rotate-90 transition-transform duration-500" />
             <span className="text-[10px] font-bold uppercase tracking-[0.2em]">System Config</span>
           </Link>
           <button 
-            onClick={signOut}
+            onClick={() => {
+              onNavClick?.();
+              signOut();
+            }}
             className="w-full flex items-center gap-4 px-6 py-3 text-on-surface-variant hover:text-red-500 transition-colors group"
           >
             <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
@@ -116,9 +130,16 @@ const AdminSidebar: React.FC = () => {
         </div>
 
         {/* Profile Section */}
-        <div className="p-2 rounded-[2rem] bg-surface-container-low border border-white/5 hover:border-primary/30 transition-colors group cursor-pointer">
+        <Link 
+          to="/admin/profile"
+          onClick={onNavClick}
+          className={cn(
+            "block p-2 rounded-[2rem] bg-surface-container-low border transition-all group cursor-pointer",
+            isActive('/admin/profile') ? "border-primary/50 shadow-[0_0_20px_rgba(78,222,163,0.1)]" : "border-white/5 hover:border-primary/30"
+          )}
+        >
           <ProfileChip showDetails={true} className="p-2" />
-        </div>
+        </Link>
       </div>
     </aside>
   );

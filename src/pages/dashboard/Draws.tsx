@@ -6,6 +6,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../components/auth/AuthProvider';
 import { useSubscription } from '../../hooks/useSubscription';
 import { cn, formatCurrency, formatDate } from '../../lib/utils';
+import EmptyState from '../../components/ui/EmptyState';
 import type { Draw } from '../../types';
 
 const DrawsHistory: React.FC = () => {
@@ -153,9 +154,18 @@ const DrawsHistory: React.FC = () => {
           })}
 
           {draws.length === 0 && (
-            <div className="glass-card p-12 text-center text-on-surface-variant">
-              <Calendar className="w-12 h-12 mx-auto mb-4 opacity-20" />
-              <p>No historical draws have been processed yet.</p>
+            <div className="py-20 flex flex-col items-center">
+              <EmptyState 
+                icon={Trophy}
+                title="No Draw History Logged"
+                description="The monthly algorithmic draw has not been processed for the current cycle. Your results and prize eligibility will be logged here as soon as the protocol verification cycle completes."
+                className="py-20 border-none bg-transparent"
+              />
+              {!isActive && (
+                <p className="mt-8 text-[10px] font-bold uppercase tracking-[0.4em] text-on-surface-variant animate-pulse">
+                  System Sync: Waiting for Protocol Authorization
+                </p>
+              )}
             </div>
           )}
         </div>

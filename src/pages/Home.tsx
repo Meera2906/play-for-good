@@ -15,9 +15,11 @@ import {
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../components/auth/AuthProvider';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 const Home: React.FC = () => {
   const { user } = useAuth();
+  usePageTitle('Sovereign Catalyst');
 
   return (
     <div className="flex flex-col bg-background">

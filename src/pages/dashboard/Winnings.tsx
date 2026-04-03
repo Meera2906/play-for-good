@@ -6,6 +6,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../components/auth/AuthProvider';
 import { useSubscription } from '../../hooks/useSubscription';
 import { cn, formatCurrency, formatDate } from '../../lib/utils';
+import EmptyState from '../../components/ui/EmptyState';
 import type { DrawEntry } from '../../types';
 import ProofUpload from '../../components/ui/ProofUpload';
 
@@ -104,10 +105,18 @@ const Winnings: React.FC = () => {
         )}
 
         {entries.length === 0 ? (
-          <div className="glass-card p-16 text-center text-on-surface-variant flex flex-col items-center">
-            <Search className="w-16 h-16 mb-4 opacity-20" />
-            <p className="text-lg">No participation history found.</p>
-            <p className="text-sm mt-2 max-w-md mx-auto opacity-70">Once the monthly protocol executes, your results will appear here.</p>
+          <div className="py-20 flex flex-col items-center">
+            <EmptyState 
+              icon={Award}
+              title="Identity Reward Vault Empty"
+              description="Your rewards ledger is currently unpopulated. Once the protocol verification cycle completes, your results and prize eligibility will be logged here."
+              className="py-20 border-none bg-transparent"
+            />
+            {!isActive && (
+              <p className="mt-8 text-[10px] font-bold uppercase tracking-[0.4em] text-on-surface-variant animate-pulse">
+                Access Locked: Protocol Authorization Required
+              </p>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-8">

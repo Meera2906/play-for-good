@@ -4,9 +4,11 @@ import { Search, Filter, Heart, Globe, ArrowRight, ExternalLink, Info, Check } f
 import { supabase } from '../lib/supabase';
 import { cn, formatCurrency } from '../lib/utils';
 import { useAuth } from '../components/auth/AuthProvider';
+import { usePageTitle } from '../hooks/usePageTitle';
 import type { Charity } from '../types';
 
 const Charities: React.FC = () => {
+  usePageTitle('Impact Partners');
   const { user, profile, refreshProfile } = useAuth();
   const [charities, setCharities] = useState<Charity[]>([]);
   const [loading, setLoading] = useState(true);

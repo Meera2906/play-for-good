@@ -6,6 +6,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../components/auth/AuthProvider';
 import { useSubscription } from '../../hooks/useSubscription';
 import { cn, formatCurrency } from '../../lib/utils';
+import EmptyState from '../../components/ui/EmptyState';
 import type { Charity } from '../../types';
 
 const CharitySelection: React.FC = () => {
@@ -107,39 +108,55 @@ const CharitySelection: React.FC = () => {
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {charities.map((charity) => (
-              <motion.div
-                key={charity.id}
-                whileHover={{ scale: 1.02 }}
-                onClick={() => setSelectedCharityId(charity.id)}
-                className={cn(
-                  "glass-card cursor-pointer transition-all duration-300 relative overflow-hidden group border-2",
-                  selectedCharityId === charity.id 
-                    ? "border-primary shadow-[0_0_30px_rgba(78,222,163,0.15)]" 
-                    : "border-transparent hover:border-white/10"
+            {charities.length === 0 ? (
+              <div className="col-span-full py-20 flex flex-col items-center">
+                <EmptyState 
+                  icon={Heart}
+                  title="No Impact Partners Found"
+                  description="The global impact matrix is currently initializing. Our strategic charity partners will appear here as soon as the protocol synchronization is complete."
+                  className="py-20 border-none bg-transparent"
+                />
+                {!isActive && (
+                  <p className="mt-8 text-[10px] font-bold uppercase tracking-[0.4em] text-on-surface-variant animate-pulse">
+                    Identity Verified: Awaiting Protocol Subscription
+                  </p>
                 )}
-              >
-                {selectedCharityId === charity.id && (
-                  <div className="absolute top-4 right-4 z-20 w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-lg">
-                    <CheckCircle2 className="w-5 h-5 text-background" />
-                  </div>
-                )}
-                
-                <div className="h-40 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-background/50 z-10 group-hover:bg-background/20 transition-colors" />
-                  <img src={charity.logo_url} alt={charity.name} className="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700" referrerPolicy="no-referrer" />
-                  {selectedCharityId === charity.id && (
-                    <div className="absolute inset-0 bg-primary/20 z-10 mix-blend-overlay" />
+              </div>
+            ) : (
+              charities.map((charity) => (
+                <motion.div
+                  key={charity.id}
+                  whileHover={{ scale: 1.02 }}
+                  onClick={() => setSelectedCharityId(charity.id)}
+                  className={cn(
+                    "glass-card cursor-pointer transition-all duration-300 relative overflow-hidden group border-2",
+                    selectedCharityId === charity.id 
+                      ? "border-primary shadow-[0_0_30px_rgba(78,222,163,0.15)]" 
+                      : "border-transparent hover:border-white/10"
                   )}
-                </div>
-                
-                <div className="p-8 relative z-20">
-                  <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-primary mb-3 block">{charity.category}</span>
-                  <h3 className="text-2xl font-display font-bold uppercase tracking-tight mb-3 leading-none">{charity.name}</h3>
-                  <p className="text-sm text-on-surface-variant line-clamp-2">{charity.description}</p>
-                </div>
-              </motion.div>
-            ))}
+                >
+                  {selectedCharityId === charity.id && (
+                    <div className="absolute top-4 right-4 z-20 w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-lg">
+                      <CheckCircle2 className="w-5 h-5 text-background" />
+                    </div>
+                  )}
+                  
+                  <div className="h-40 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-background/50 z-10 group-hover:bg-background/20 transition-colors" />
+                    <img src={charity.logo_url} alt={charity.name} className="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700" referrerPolicy="no-referrer" />
+                    {selectedCharityId === charity.id && (
+                      <div className="absolute inset-0 bg-primary/20 z-10 mix-blend-overlay" />
+                    )}
+                  </div>
+                  
+                  <div className="p-8 relative z-20">
+                    <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-primary mb-3 block">{charity.category}</span>
+                    <h3 className="text-2xl font-display font-bold uppercase tracking-tight mb-3 leading-none">{charity.name}</h3>
+                    <p className="text-sm text-on-surface-variant line-clamp-2">{charity.description}</p>
+                  </div>
+                </motion.div>
+              ))
+            )}
           </div>
         </div>
 

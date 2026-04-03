@@ -219,8 +219,6 @@ export async function finalizeAndPublishDraw(
     throw dErr;
   }
 
-  console.log('[Matrix Engine] Draw created with ID:', draw.id);
-
   // 3. Create Draw Entries for all participants
   const entryRecords = results.allEntries.map(e => {
     const winnerData = results.winners.find(w => w.user_id === e.user_id);
@@ -235,7 +233,7 @@ export async function finalizeAndPublishDraw(
   });
 
   if (entryRecords.length > 0) {
-    console.log(`[Matrix Engine] Archiving ${entryRecords.length} member entries...`);
+    // console.log(`[Matrix Engine] Archiving ${entryRecords.length} member entries...`);
     const { error: eErr } = await supabase
       .from('draw_entries')
       .insert(entryRecords);

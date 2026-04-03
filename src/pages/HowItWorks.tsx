@@ -6,9 +6,11 @@ import {
   Award, TrendingUp, Users
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { usePageTitle } from '../hooks/usePageTitle';
 import { cn } from '../lib/utils';
 
 const HowItWorks: React.FC = () => {
+  usePageTitle('The Protocol');
   const steps = [
     {
       title: 'The Elite Entry',

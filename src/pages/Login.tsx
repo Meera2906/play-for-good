@@ -8,6 +8,7 @@ import { Trophy, Mail, Lock, ArrowRight, Github, Chrome, AlertCircle } from 'luc
 import { supabase } from '../lib/supabase';
 import { cn } from '../lib/utils';
 import { useAuth } from '../components/auth/AuthProvider';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -17,6 +18,7 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 const Login: React.FC = () => {
+  usePageTitle('Matrix Entry');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();

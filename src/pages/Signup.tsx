@@ -8,6 +8,7 @@ import { Trophy, Mail, Lock, User, ArrowRight, Github, Chrome, AlertCircle, Chec
 import { supabase } from '../lib/supabase';
 import { cn } from '../lib/utils';
 import { useAuth } from '../components/auth/AuthProvider';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 const signupSchema = z.object({
   fullName: z.string().min(2, 'Full name must be at least 2 characters'),
@@ -22,6 +23,7 @@ const signupSchema = z.object({
 type SignupFormValues = z.infer<typeof signupSchema>;
 
 const Signup: React.FC = () => {
+  usePageTitle('Protocol Initialization');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);

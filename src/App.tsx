@@ -24,7 +24,11 @@ import AdminCharities from './pages/admin/Charities';
 import AdminDraws from './pages/admin/Draws';
 import AdminWinners from './pages/admin/Winners';
 import AdminAnalytics from './pages/admin/Analytics';
+import SubscriptionsPage from './pages/admin/Subscriptions.tsx';
 import Leaderboard from './pages/Leaderboard';
+
+import Profile from './pages/dashboard/Profile';
+import NotFound from './pages/NotFound';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode; adminOnly?: boolean }> = ({ children, adminOnly }) => {
   const { user, profile, loading } = useAuth();
@@ -50,6 +54,20 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; adminOnly?: boolean 
   return <>{children}</>;
 };
 
+const AuthCheck: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, profile, loading } = useAuth();
+  const location = useLocation();
+
+  if (loading) return null;
+
+  if (user) {
+    const from = (location.state as any)?.from?.pathname || (profile?.role === 'admin' ? '/admin' : '/dashboard');
+    return <Navigate to={from} replace />;
+  }
+
+  return <>{children}</>;
+};
+
 const AppContent: React.FC = () => {
   const location = useLocation();
   const isDashboard = location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/admin');
@@ -63,8 +81,17 @@ const AppContent: React.FC = () => {
           <Route path="/charities" element={<Charities />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
+          
+          <Route path="/login" element={
+            <AuthCheck>
+              <Login />
+            </AuthCheck>
+          } />
+          <Route path="/signup" element={
+            <AuthCheck>
+              <Signup />
+            </AuthCheck>
+          } />
           
           <Route path="/dashboard" element={
             <ProtectedRoute>
@@ -77,6 +104,7 @@ const AppContent: React.FC = () => {
             <Route path="draws" element={<Draws />} />
             <Route path="winnings" element={<Winnings />} />
             <Route path="subscription" element={<Subscription />} />
+            <Route path="profile" element={<Profile />} />
           </Route>
           
           <Route path="/admin" element={
@@ -89,8 +117,12 @@ const AppContent: React.FC = () => {
             <Route path="charities" element={<AdminCharities />} />
             <Route path="draws" element={<AdminDraws />} />
             <Route path="winners" element={<AdminWinners />} />
+            <Route path="subscriptions" element={<SubscriptionsPage />} />
             <Route path="analytics" element={<AdminAnalytics />} />
+            <Route path="profile" element={<Profile />} />
           </Route>
+          
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
       {!isDashboard && <Footer />}

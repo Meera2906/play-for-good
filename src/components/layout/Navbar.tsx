@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Trophy, LogOut, User, LayoutDashboard, Settings } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../auth/AuthProvider';
 import { cn } from '../../lib/utils';
 
@@ -104,44 +104,60 @@ const Navbar: React.FC = () => {
       </div>
 
       {/* Mobile Menu */}
-      {isOpen && (
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="md:hidden absolute top-full left-0 right-0 bg-background/95 backdrop-blur-3xl border-b border-white/5 p-10 flex flex-col gap-8 shadow-2xl"
-        >
-          {navLinks.map((link) => (
-            <Link
-              key={link.path}
-              to={link.path}
-              className="text-2xl font-display font-bold uppercase tracking-tight"
-              onClick={() => setIsOpen(false)}
-            >
-              {link.name}
-            </Link>
-          ))}
-          <div className="h-px bg-white/5" />
-          {user ? (
-            <div className="flex flex-col gap-6">
-              <Link to="/dashboard" className="text-xl font-display font-bold uppercase text-primary" onClick={() => setIsOpen(false)}>
-                Dashboard
-              </Link>
-              <button onClick={() => { signOut(); setIsOpen(false); }} className="text-on-surface-variant flex items-center gap-3 text-sm font-bold uppercase tracking-widest">
-                <LogOut className="w-5 h-5" /> Sign Out
-              </button>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden absolute top-full left-0 right-0 bg-background/95 backdrop-blur-3xl border-b border-white/5 overflow-hidden shadow-2xl"
+          >
+            <div className="p-10 flex flex-col gap-8">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={cn(
+                    "text-2xl font-display font-bold uppercase tracking-tight",
+                    isActive(link.path) ? "text-primary" : "text-on-surface"
+                  )}
+                  onClick={() => setIsOpen(false)}
+                >
+                  {link.name}
+                </Link>
+              ))}
+              <div className="h-px bg-white/5" />
+              {user ? (
+                <div className="flex flex-col gap-6">
+                  <Link 
+                    to={profile?.role === 'admin' ? '/admin' : '/dashboard'} 
+                    className="text-xl font-display font-bold uppercase text-primary flex items-center gap-3" 
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <LayoutDashboard className="w-5 h-5" />
+                    Dashboard
+                  </Link>
+                  <button 
+                    onClick={() => { signOut(); setIsOpen(false); }} 
+                    className="text-on-surface-variant flex items-center gap-4 text-sm font-bold uppercase tracking-widest hover:text-red-500 transition-colors"
+                  >
+                    <LogOut className="w-5 h-5" /> Sign Out
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-6 text-center">
+                  <Link to="/login" className="text-xl font-display font-bold uppercase border border-white/10 py-4 rounded-full" onClick={() => setIsOpen(false)}>
+                    Log in
+                  </Link>
+                  <Link to="/signup" className="w-full py-5 rounded-full bg-primary text-background text-center font-bold uppercase tracking-widest shadow-lg shadow-primary/20" onClick={() => setIsOpen(false)}>
+                    Apply for Entry
+                  </Link>
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="flex flex-col gap-6">
-              <Link to="/login" className="text-xl font-display font-bold uppercase" onClick={() => setIsOpen(false)}>
-                Log in
-              </Link>
-              <Link to="/signup" className="w-full py-5 rounded-full bg-primary text-background text-center font-bold uppercase tracking-widest" onClick={() => setIsOpen(false)}>
-                Apply for Entry
-              </Link>
-            </div>
-          )}
-        </motion.div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 };

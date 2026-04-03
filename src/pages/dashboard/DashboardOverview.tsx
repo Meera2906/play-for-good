@@ -10,11 +10,14 @@ import { useAuth } from '../../components/auth/AuthProvider';
 import { useSubscription } from '../../hooks/useSubscription';
 import { supabase } from '../../lib/supabase';
 import { cn, formatCurrency, formatDate } from '../../lib/utils';
+import { usePageTitle } from '../../hooks/usePageTitle';
+import EmptyState from '../../components/ui/EmptyState';
 import type { Score, Charity } from '../../types';
 
 const DashboardOverview: React.FC = () => {
   const { user, profile } = useAuth();
   const { subscription, isActive, loading: subLoading } = useSubscription();
+  usePageTitle('Control Hub');
   const [scores, setScores] = useState<Score[]>([]);
   const [charities, setCharities] = useState<Charity[]>([]);
   const [latestDraw, setLatestDraw] = useState<any>(null);
@@ -285,9 +288,13 @@ const DashboardOverview: React.FC = () => {
                       </div>
                     ))
                   ) : (
-                    <div className="glass-card p-16 text-center border-dashed rounded-[2.5rem]">
-                      <Target className="w-16 h-16 text-on-surface-variant mx-auto mb-6 opacity-10" />
-                      <p className="text-on-surface-variant font-sans">No scores submitted yet.</p>
+                    <div className="col-span-full">
+                      <EmptyState 
+                        icon={Target}
+                        title="No Scores Yet"
+                        description="Your performance matrix is empty. Log your first round to start calculating your entry average for the next monthly draw."
+                        className="py-12 border-none bg-transparent"
+                      />
                     </div>
                   )}
                 </div>
