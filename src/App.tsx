@@ -29,6 +29,7 @@ import SubscriptionsPage from './pages/admin/Subscriptions';
 import Leaderboard from './pages/Leaderboard';
 
 import Profile from './pages/dashboard/Profile';
+import CharityDetail from './pages/CharityDetail';
 import NotFound from './pages/NotFound';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode; adminOnly?: boolean }> = ({ children, adminOnly }) => {
@@ -96,6 +97,7 @@ const AppContent: React.FC = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/charities" element={<Charities />} />
+          <Route path="/charities/:slug" element={<CharityDetail />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           

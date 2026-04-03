@@ -21,11 +21,16 @@ export interface Profile extends User {
 export interface Charity {
   id: string;
   name: string;
+  slug: string;
   description: string;
+  long_description?: string;
   logo_url: string;
+  image_url?: string;
   website_url: string;
   total_raised: number;
   category: string;
+  featured?: boolean;
+  upcoming_events?: Array<{ title: string; date: string; location: string }>;
 }
 
 export interface Score {

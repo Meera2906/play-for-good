@@ -10,12 +10,14 @@ import {
 import { supabase } from '../../lib/supabase';
 import { cn, formatCurrency, formatDate } from '../../lib/utils';
 import EmptyState from '../../components/ui/EmptyState';
+import ManageScoresModal from '../../components/admin/ManageScoresModal';
 
 const AdminUsers: React.FC = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'user'>('all');
+  const [selectedUserForScores, setSelectedUserForScores] = useState<any | null>(null);
 
   useEffect(() => {
     fetchUsers();
@@ -238,8 +240,12 @@ const AdminUsers: React.FC = () => {
                            >
                             {u.role === 'admin' ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
                            </button>
-                           <button className="w-10 h-10 bg-white/5 hover:bg-primary/20 hover:text-primary rounded-xl flex items-center justify-center transition-all border border-white/5">
-                              <MoreVertical className="w-4 h-4" />
+                           <button 
+                             onClick={() => setSelectedUserForScores(u)}
+                             className="w-10 h-10 bg-white/5 hover:bg-primary/20 hover:text-primary rounded-xl flex items-center justify-center transition-all border border-white/5"
+                             title="Manage Scores"
+                           >
+                              <Edit3 className="w-4 h-4" />
                            </button>
                        </div>
                     </td>
@@ -250,6 +256,15 @@ const AdminUsers: React.FC = () => {
           </table>
         </div>
       </div>
+
+      <AnimatePresence>
+        {selectedUserForScores && (
+          <ManageScoresModal 
+            user={selectedUserForScores} 
+            onClose={() => setSelectedUserForScores(null)} 
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };

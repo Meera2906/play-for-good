@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Search, Filter, Heart, Globe, ArrowRight, ExternalLink, Info, Check } from 'lucide-react';
+import { Search, Filter, Heart, Globe, ArrowRight, ExternalLink, Info, Check, Trophy } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { cn, formatCurrency } from '../lib/utils';
 import { useAuth } from '../components/auth/AuthProvider';
@@ -139,7 +140,7 @@ const Charities: React.FC = () => {
                 className="glass-card p-1 rounded-[2.5rem] group"
               >
                 <div className="bg-background rounded-[2.4rem] overflow-hidden flex flex-col h-full">
-                  <div className="h-56 relative overflow-hidden">
+                  <Link to={`/charities/${charity.slug}`} className="h-56 relative overflow-hidden block">
                     <img 
                       src={charity.logo_url} 
                       alt={charity.name} 
@@ -147,15 +148,24 @@ const Charities: React.FC = () => {
                       referrerPolicy="no-referrer"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
-                    <div className="absolute top-6 right-6 bg-background/60 backdrop-blur-md border border-white/10 px-4 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest text-primary">
-                      {charity.category}
+                    <div className="absolute top-6 left-6 flex flex-col gap-2">
+                       <div className="bg-background/60 backdrop-blur-md border border-white/10 px-4 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest text-primary w-fit">
+                        {charity.category}
+                      </div>
+                      {charity.featured && (
+                        <div className="bg-secondary/20 backdrop-blur-md border border-secondary/30 px-4 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest text-secondary flex items-center gap-1.5 w-fit">
+                          <Trophy className="w-3 h-3" /> Featured
+                        </div>
+                      )}
                     </div>
-                  </div>
+                  </Link>
                   
                   <div className="p-10 flex flex-col flex-grow">
-                    <h3 className="text-2xl font-display font-bold uppercase mb-4 tracking-tight group-hover:text-primary transition-colors">
-                      {charity.name}
-                    </h3>
+                    <Link to={`/charities/${charity.slug}`}>
+                      <h3 className="text-2xl font-display font-bold uppercase mb-4 tracking-tight group-hover:text-primary transition-colors">
+                        {charity.name}
+                      </h3>
+                    </Link>
                     <p className="text-on-surface-variant text-sm leading-relaxed mb-10 flex-grow line-clamp-3 font-sans">
                       {charity.description}
                     </p>

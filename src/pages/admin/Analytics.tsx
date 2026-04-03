@@ -12,7 +12,7 @@ import {
   BarChart, Bar, Cell, PieChart, Pie
 } from 'recharts';
 import { supabase } from '../../lib/supabase';
-import { formatCurrency } from '../../lib/utils';
+import { cn, formatCurrency } from '../../lib/utils';
 
 const Analytics: React.FC = () => {
   const [loading, setLoading] = useState(true);
