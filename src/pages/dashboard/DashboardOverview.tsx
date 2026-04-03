@@ -24,6 +24,7 @@ const DashboardOverview: React.FC = () => {
   const [latestEntry, setLatestEntry] = useState<any>(null);
   const [featuredCharities, setFeaturedCharities] = useState<Charity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingFeatured, setLoadingFeatured] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
@@ -85,6 +86,7 @@ const DashboardOverview: React.FC = () => {
         .eq('featured', true)
         .limit(3);
       setFeaturedCharities(featuredData || []);
+      setLoadingFeatured(false);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
@@ -474,11 +476,10 @@ const DashboardOverview: React.FC = () => {
           </div>
         </div>
 
-        {/* Discover New Impact Section */}
-        <section className="mt-32">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-8 px-2">
+        {/* Dynamic Impact Matrix / Discovery Section */}
+        <div className="mt-20 space-y-12">
+          <div className="flex flex-col md:flex-row justify-between items-end gap-8 px-2">
             <div>
-              <h2 className="text-4xl font-display font-black uppercase tracking-tight mb-4">Discover New Impact</h2>
               <p className="text-on-surface-variant text-sm font-sans max-w-xl">
                 Explore these hand-selected partners pushing the boundaries of global change. Your next performance could be their breakthrough.
               </p>
@@ -521,7 +522,7 @@ const DashboardOverview: React.FC = () => {
               </motion.div>
             ))}
           </div>
-        </section>
+        </div>
       </div>
     </>
   );

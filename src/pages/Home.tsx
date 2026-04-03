@@ -1,16 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { 
-  ArrowRight, 
-  Zap, 
-  Trophy, 
-  Target, 
-  Heart, 
-  CheckCircle2, 
-  Verified, 
-  Leaf, 
-  School, 
+import {
+  ArrowRight,
+  Zap,
+  Trophy,
+  Target,
+  Heart,
+  CheckCircle2,
+  Verified,
+  Leaf,
+  School,
   Activity
 } from 'lucide-react';
 import { cn, formatCurrency } from '../lib/utils';
@@ -33,7 +33,7 @@ const Home: React.FC = () => {
           .select('*')
           .eq('featured', true)
           .limit(3);
-        
+
         if (error) throw error;
         setFeaturedCharities(data || []);
       } catch (err) {
@@ -50,33 +50,41 @@ const Home: React.FC = () => {
     <div className="flex flex-col bg-background">
       {/* Hero Section */}
       <section className="relative min-h-[921px] flex items-center px-6 md:px-12 overflow-hidden">
-        <div className="absolute inset-0 z-0 opacity-10">
-          <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary blur-[160px] rounded-full -translate-y-1/2 translate-x-1/3 animate-pulse" />
-          <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-secondary blur-[160px] rounded-full translate-y-1/3 -translate-x-1/4" />
+        <div className="absolute inset-y-0 right-0 w-1/2 z-0 pointer-events-none">
+          <img
+            src="/images/hero-bg.png"
+            alt="Sovereign Catalyst Background"
+            className="w-full h-full object-cover object-right opacity-30 scale-100 translate-x-12"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/60 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-background to-transparent" />
         </div>
-        
+
         <div className="relative z-10 max-w-[1920px] mx-auto w-full">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
             className="flex flex-col gap-10"
           >
-            <div className="inline-flex items-center gap-4 px-6 py-2 rounded-full border border-white/5 bg-white/5 backdrop-blur-md w-fit">
-              <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              <span className="font-sans text-[10px] font-bold uppercase tracking-[0.3em] text-on-surface-variant">The Matrix is Synchronized</span>
+            <div className="relative group w-fit">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 rounded-full blur opacity-50 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-pulse" />
+              <div className="relative inline-flex items-center gap-4 px-6 py-2 rounded-full border border-white/10 bg-black/40 backdrop-blur-2xl w-fit shadow-[0_0_15px_rgba(78,222,163,0.1)]">
+                <div className="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_10px_rgba(78,222,163,0.8)]" />
+                <span className="font-sans text-[10px] font-bold uppercase tracking-[0.4em] text-primary">The Sovereign Catalyst</span>
+              </div>
             </div>
-            
+
             <h1 className="font-display text-7xl md:text-[160px] leading-[0.85] font-black uppercase tracking-tighter max-w-6xl">
-              Sovereign <br/>
+              Sovereign <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-on-surface to-secondary-container italic">Catalyst.</span>
             </h1>
-            
+
             <p className="font-sans text-lg md:text-2xl text-on-surface-variant max-w-2xl leading-relaxed">
-              Achieve absolute precision. Your performance metrics translated into immediate, verifiable global impact. 
+              Achieve absolute precision. Your performance metrics translated into immediate, verifiable global impact.
               Join the elite circle of change.
             </p>
-            
+
             <div className="flex flex-col md:flex-row items-center gap-8 mt-4">
               <Link to="/signup" className="group relative px-12 py-6 rounded-full bg-white text-background font-bold text-lg uppercase tracking-widest overflow-hidden hover:scale-105 transition-all active:scale-95 shadow-2xl shadow-white/10">
                 <span className="relative z-10">Initialize Flow</span>
@@ -118,7 +126,7 @@ const Home: React.FC = () => {
           </div>
           <span className="hidden md:block font-display text-9xl font-black text-white/5 pointer-events-none uppercase tracking-tighter">PROCESS</span>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {[
             { id: '01', title: 'Subscribe', desc: 'Choose your tier of impact. From Monthly to Sovereign Yearly, every membership fuels the engine of change.' },
@@ -126,7 +134,7 @@ const Home: React.FC = () => {
             { id: '03', title: 'Enter Monthly Draw', desc: 'Your skill translates into participation. Monthly draws reward the most consistent catalysts.', delay: 0.2 },
             { id: '04', title: 'Support & Win', desc: 'Experience the dual thrill of personal victory and tangible global contribution. Elevate yourself by elevating others.', delay: 0.3, mt: true, highlight: true }
           ].map((step) => (
-            <motion.div 
+            <motion.div
               key={step.id}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -161,7 +169,7 @@ const Home: React.FC = () => {
               View All Partners <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {loadingCharities ? (
               [1, 2, 3].map((i) => (
@@ -169,7 +177,7 @@ const Home: React.FC = () => {
               ))
             ) : featuredCharities.length > 0 ? (
               featuredCharities.map((charity, idx) => (
-                <motion.div 
+                <motion.div
                   key={charity.id}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -180,11 +188,11 @@ const Home: React.FC = () => {
                 >
                   <Link to={`/charities/${charity.slug}`} className="bg-background rounded-[2.4rem] overflow-hidden block h-full">
                     <div className="h-64 overflow-hidden relative">
-                      <img 
-                        src={charity.image_url || charity.logo_url} 
-                        alt={charity.name} 
-                        className="w-full h-full object-cover" 
-                        referrerPolicy="no-referrer" 
+                      <img
+                        src={charity.image_url || charity.logo_url}
+                        alt={charity.name}
+                        className="w-full h-full object-cover"
+                        referrerPolicy="no-referrer"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-60" />
                     </div>
@@ -215,25 +223,25 @@ const Home: React.FC = () => {
           <h2 className="font-display text-5xl font-extrabold mb-6 uppercase tracking-tighter">The Rewards Hierarchy</h2>
           <p className="text-on-surface-variant max-w-xl mx-auto">Precision is rewarded. Every tier of excellence unlocks a new dimension of potential.</p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-center">
           <div className="relative p-10 bg-surface-container rounded-full aspect-square flex flex-col items-center justify-center text-center border border-white/5">
             <span className="font-display text-xs font-bold text-primary mb-4 tracking-[0.3em] uppercase">Platinum Match</span>
             <h5 className="font-display text-6xl font-black mb-4">5/5</h5>
-            <p className="font-sans text-on-surface-variant text-sm">Access to the Sovereign Vault.<br/>£1M+ Prize Pool Entry.</p>
+            <p className="font-sans text-on-surface-variant text-sm">Access to the Sovereign Vault.<br />£1M+ Prize Pool Entry.</p>
           </div>
-          
+
           <div className="relative p-10 bg-surface-container-high rounded-full aspect-square flex flex-col items-center justify-center text-center border-2 border-primary/20 md:scale-110 shadow-[0_0_80px_rgba(78,222,163,0.1)]">
             <span className="font-display text-xs font-bold text-secondary mb-4 tracking-[0.3em] uppercase">Gold Match</span>
             <h5 className="font-display text-6xl font-black mb-4">4/5</h5>
-            <p className="font-sans text-on-surface-variant text-sm">Exclusive Luxury Rewards.<br/>£250k Prize Distribution.</p>
+            <p className="font-sans text-on-surface-variant text-sm">Exclusive Luxury Rewards.<br />£250k Prize Distribution.</p>
             <div className="absolute -top-4 bg-primary text-background px-6 py-1 rounded-full text-xs font-bold uppercase tracking-widest">MOST FREQUENT</div>
           </div>
-          
+
           <div className="relative p-10 bg-surface-container rounded-full aspect-square flex flex-col items-center justify-center text-center border border-white/5">
             <span className="font-display text-xs font-bold text-tertiary mb-4 tracking-[0.3em] uppercase">Silver Match</span>
             <h5 className="font-display text-6xl font-black mb-4">3/5</h5>
-            <p className="font-sans text-on-surface-variant text-sm">Impact Multipliers.<br/>Instant Digital Rewards.</p>
+            <p className="font-sans text-on-surface-variant text-sm">Impact Multipliers.<br />Instant Digital Rewards.</p>
           </div>
         </div>
       </section>
@@ -268,7 +276,7 @@ const Home: React.FC = () => {
                 {user ? "View Dashboard" : "Begin Journey"}
               </Link>
             </div>
-            
+
             {/* Yearly */}
             <div className="relative p-12 bg-gradient-to-br from-surface-container-highest to-background rounded-[3rem] border-2 border-secondary/30 overflow-hidden shadow-2xl shadow-secondary/10">
               <div className="absolute -top-12 -right-12 w-48 h-48 bg-secondary/10 blur-[60px] rounded-full"></div>
@@ -312,16 +320,16 @@ const Home: React.FC = () => {
       {/* Final CTA */}
       <section className="py-48 px-6 md:px-12 text-center relative overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <img 
-            alt="Abstract light" 
-            className="w-full h-full object-cover opacity-10" 
+          <img
+            alt="Abstract light"
+            className="w-full h-full object-cover opacity-10"
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuCChrstWqBKftHByB15-_sSCv98zZFgQv6O54foF0v7-QhHsEoeVrSHBxkcymgJvtRDSK1qPMXlTXnOaOd5TURIn0TG6Mjn3ncBm4QVfZ5FGCmeAKIY3nwnYtLjxDsW_2uYW0kQYK7afjwMxpoT21pZpw_esGm73aiIXSqLgW_j8n8FC7b1Ygo0awTuakFXz84OAiIsZbk1l6n3_OZTxkkDIT3g_O4il4WNK6iub3za05179aJaB_pWeF_1hp_EupLYNBtrvBXbxiZP"
             referrerPolicy="no-referrer"
           />
         </div>
         <div className="relative z-10 max-w-4xl mx-auto">
           <h2 className="font-display text-6xl md:text-8xl font-extrabold mb-10 tracking-tight uppercase">
-            Elevate your game.<br/>
+            Elevate your game.<br />
             <span className="text-primary">Change the world.</span>
           </h2>
           <Link to={user ? "/dashboard" : "/signup"} className="inline-block px-16 py-6 rounded-full bg-gradient-to-br from-primary to-primary-container text-background font-bold text-xl hover:scale-105 transition-all active:scale-95 shadow-xl shadow-primary/20">
