@@ -2,7 +2,7 @@
 
 **A premium subscription-based golf platform combining competitive score tracking, monthly reward draws, and meaningful charity contributions.**
 
-[![Tech Stack](https://skillicons.dev/icons?i=react,ts,tailwind,vite,supabase,postgres,vercel&theme=dark)](https://skillicons.dev)
+[![Tech Stack](https://skillicons.dev/icons?i=nextjs,react,ts,tailwind,nodejs,supabase,postgres,vercel&theme=dark)](https://skillicons.dev)
 
 🔗 **Live Demo:** [play-for-good-hazel.vercel.app](https://play-for-good-hazel.vercel.app/)
 
