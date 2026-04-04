@@ -26,7 +26,7 @@ interface UserSidebarProps {
 
 const UserSidebar: React.FC<UserSidebarProps> = ({ onNavClick }) => {
   const location = useLocation();
-  const { signOut } = useAuth();
+  const { profile, signOut } = useAuth();
 
   const menuItems = [
     { icon: LayoutDashboard, label: 'Control Hub', path: '/dashboard' },
@@ -52,7 +52,15 @@ const UserSidebar: React.FC<UserSidebarProps> = ({ onNavClick }) => {
               Play <span className="text-primary italic">for</span> Good
             </span>
             <span className="text-[8px] font-bold uppercase tracking-[0.4em] text-on-surface-variant mt-1">
-              Member Core 1.0
+              {profile?.role === 'admin' 
+                ? 'System Core Active'
+                : profile?.subscription_status === 'active' 
+                  ? `${profile.subscription_tier === 'yearly' ? 'Sovereign' : profile.subscription_tier === 'monthly' ? 'Elite' : 'Spectator'} Core Active`
+                  : profile?.subscription_status === 'cancelled'
+                    ? 'Core Cancelled'
+                    : profile?.subscription_status === 'lapsed'
+                      ? 'Core Lapsed'
+                      : 'Member Core 1.0'}
             </span>
           </div>
         </Link>

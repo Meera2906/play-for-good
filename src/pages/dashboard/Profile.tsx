@@ -54,7 +54,33 @@ const Profile: React.FC = () => {
           <User className="w-8 h-8 text-primary" />
         </div>
         <div>
-          <h1 className="text-5xl font-display font-black uppercase tracking-tight">Identity <span className="text-primary italic">Matrix.</span></h1>
+          <div className="flex items-center gap-4">
+            <h1 className="text-5xl font-display font-black uppercase tracking-tight">Identity <span className="text-primary italic">Matrix.</span></h1>
+            {profile.role === 'admin' ? (
+              <div className="px-4 py-1.5 rounded-full border border-secondary/30 bg-secondary/10 text-secondary text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-secondary/20">
+                System Admin
+              </div>
+            ) : profile.subscription_status === 'cancelled' ? (
+              <div className="px-4 py-1.5 rounded-full border border-red-500/30 bg-red-500/10 text-red-500 text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-red-500/20">
+                Core Cancelled
+              </div>
+            ) : profile.subscription_status === 'lapsed' ? (
+              <div className="px-4 py-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-500 text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-amber-500/20">
+                Core Lapsed
+              </div>
+            ) : profile.subscription_status === 'active' && (
+              <div className={cn(
+                "px-4 py-1.5 rounded-full border text-[10px] font-black uppercase tracking-[0.2em] animate-pulse shadow-lg",
+                profile.subscription_tier === 'yearly' 
+                  ? "bg-secondary/10 border-secondary/30 text-secondary shadow-secondary/20" 
+                  : profile.subscription_tier === 'monthly'
+                    ? "bg-primary/10 border-primary/30 text-primary shadow-primary/20"
+                    : "bg-surface-container border-white/5 text-on-surface-variant shadow-none"
+              )}>
+                {profile.subscription_tier === 'yearly' ? 'Sovereign' : profile.subscription_tier === 'monthly' ? 'Elite' : 'Spectator'}
+              </div>
+            )}
+          </div>
           <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-on-surface-variant flex items-center gap-3">
             Core Protocol Settings / Account 0x{profile.id.slice(0, 8).toUpperCase()}
           </p>
@@ -77,8 +103,27 @@ const Profile: React.FC = () => {
                 </div>
               </div>
               <h3 className="text-xl font-display font-bold uppercase tracking-tight mb-2">{profile.full_name}</h3>
-              <div className="flex justify-center mb-6">
-                <RoleBadge role={profile.role} />
+              <div className="flex justify-center flex-wrap gap-3 mb-6">
+                {profile.role === 'admin' ? (
+                  <div className="px-3 py-1 rounded-lg border border-secondary/20 bg-secondary/10 text-secondary text-[8px] font-black uppercase tracking-widest">
+                    System Admin
+                  </div>
+                ) : profile.subscription_status === 'cancelled' ? (
+                  <div className="px-3 py-1 rounded-lg border border-red-500/20 bg-red-500/10 text-red-500 text-[8px] font-black uppercase tracking-widest">
+                    Subscription Cancelled
+                  </div>
+                ) : profile.subscription_status === 'lapsed' ? (
+                  <div className="px-3 py-1 rounded-lg border border-amber-500/20 bg-amber-500/10 text-amber-500 text-[8px] font-black uppercase tracking-widest">
+                    Payment Lapsed
+                  </div>
+                ) : profile.subscription_status === 'active' && (
+                  <div className={cn(
+                    "px-3 py-1 rounded-lg border text-[8px] font-black uppercase tracking-widest",
+                    profile.subscription_tier === 'yearly' ? "bg-secondary/10 border-secondary/20 text-secondary" : "bg-primary/10 border-primary/20 text-primary"
+                  )}>
+                    {profile.subscription_tier === 'yearly' ? 'Sovereign' : profile.subscription_tier === 'monthly' ? 'Elite' : 'Spectator'} member
+                  </div>
+                )}
               </div>
               <p className="text-xs text-on-surface-variant font-sans">{profile.email}</p>
             </div>
@@ -148,9 +193,21 @@ const Profile: React.FC = () => {
                 <h4 className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-6">Connected Protocols</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {[
+                    { 
+                      name: 'Membership Node', 
+                      status: profile.role === 'admin' 
+                        ? 'Administrative Overdrive' 
+                        : profile.subscription_status === 'active' 
+                          ? `${profile.subscription_tier === 'yearly' ? 'Sovereign' : profile.subscription_tier === 'monthly' ? 'Elite' : 'Spectator'} Active` 
+                          : profile.subscription_status === 'cancelled'
+                            ? 'Signal Terminated'
+                            : profile.subscription_status === 'lapsed'
+                              ? 'Pulse Weakening'
+                              : 'Inactive', 
+                      color: (profile.role === 'admin' || profile.subscription_status === 'active') ? 'text-primary' : (profile.subscription_status === 'cancelled' ? 'text-red-500' : (profile.subscription_status === 'lapsed' ? 'text-amber-500' : 'text-on-surface-variant')) 
+                    },
                     { name: 'Matrix Base Identity', status: 'Verified', color: 'text-primary' },
                     { name: 'GHIN Direct Connect', status: 'Inactive', color: 'text-on-surface-variant' },
-                    { name: 'Golf Australia Link', status: 'Inactive', color: 'text-on-surface-variant' },
                     { name: 'Neural 2FA Encryption', status: 'Verified', color: 'text-primary' }
                   ].map((item, idx) => (
                     <div key={idx} className="p-5 rounded-2xl border border-white/5 bg-white/5 flex items-center justify-between group">

@@ -28,7 +28,7 @@ const Onboarding: React.FC = () => {
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [selectedCharity, setSelectedCharity] = useState<Charity | null>(null);
   const [percentage, setPercentage] = useState(10);
-  const [plan, setPlan] = useState<'monthly' | 'yearly'>('monthly');
+  const [plan, setPlan] = useState<'monthly' | 'yearly' | 'free'>('monthly');
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
@@ -79,25 +79,23 @@ const Onboarding: React.FC = () => {
         .eq('user_id', user.id)
         .maybeSingle();
 
+      const renewalDays = plan === 'monthly' ? 30 : (plan === 'yearly' ? 365 : 10000); // 10000 for free to keep it active
       const subData = {
         user_id: user.id,
         charity_id: selectedCharity.id,
         charity_percentage: percentage,
         plan_type: plan,
-        amount: plan === 'monthly' ? 25.00 : 250.00,
-        status: 'inactive',
+        amount: plan === 'monthly' ? 25.00 : (plan === 'yearly' ? 250.00 : 0.00),
+        status: 'active', // Immediate activation per user request
+        start_date: new Date().toISOString(),
+        renewal_date: new Date(Date.now() + renewalDays * 24 * 60 * 60 * 1000).toISOString(),
       };
 
       if (existingSub) {
         // Update existing row
         const { error: updateError } = await supabase
           .from('subscriptions')
-          .update({
-            charity_id: selectedCharity.id,
-            charity_percentage: percentage,
-            plan_type: plan,
-            amount: subData.amount,
-          })
+          .update(subData)
           .eq('id', existingSub.id);
         if (updateError) throw updateError;
       } else {
@@ -108,10 +106,15 @@ const Onboarding: React.FC = () => {
         if (insertError) throw insertError;
       }
 
-      // 2. Mark Onboarding as Complete
+      // 2. Mark Onboarding as Complete & Update Membership Identity
       const { error: profileError } = await supabase
         .from('profiles')
-        .update({ onboarding_completed: true, selected_charity_id: selectedCharity.id })
+        .update({ 
+          onboarding_completed: true, 
+          selected_charity_id: selectedCharity.id,
+          subscription_status: 'active',
+          subscription_tier: plan
+        })
         .eq('id', user.id);
 
       if (profileError) throw profileError;
@@ -323,40 +326,77 @@ const Onboarding: React.FC = () => {
                     Select your <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary italic">Access.</span>
                   </h1>
                   <p className="text-on-surface-variant font-sans text-lg max-w-xl mx-auto">
-                    Choose the interval for your matrix participation fee.
+                    Choose your membership tier. You can always upgrade later.
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
                    {[
-                    { type: 'monthly', price: '£25', desc: 'Standard monthly protocol admission', icon: Zap },
-                    { type: 'yearly', price: '£250', desc: 'Secure the network with yearly commitment', icon: ShieldCheck, savings: 'Save £50' }
+                    { 
+                      type: 'free', 
+                      price: '£0', 
+                      name: 'Spectator', 
+                      icon: Target,
+                      features: ['Watch Live Draws', 'Community Access', 'Basic Dashboard'],
+                      desc: 'Watch from the bench'
+                    },
+                    { 
+                      type: 'monthly', 
+                      price: '£25', 
+                      name: 'Elite', 
+                      icon: Zap,
+                      features: ['Full Prize Access', 'Verified Impact', 'Instant Ingestion'],
+                      desc: 'Standard protocol'
+                    },
+                    { 
+                      type: 'yearly', 
+                      price: '£250', 
+                      name: 'Sovereign', 
+                      icon: ShieldCheck, 
+                      savings: 'Save £50',
+                      features: ['All Elite Benefits', 'Priority Verification', 'Sovereign Badge'],
+                      desc: 'Yearly network core'
+                    }
                    ].map((p) => (
                     <button
                       key={p.type}
                       onClick={() => setPlan(p.type as any)}
                       className={cn(
-                        "glass-card p-10 text-left relative transition-all group overflow-hidden",
-                        plan === p.type ? "border-primary bg-primary/5" : "hover:border-primary/20"
+                        "glass-card p-6 md:p-8 text-left relative transition-all group overflow-hidden flex flex-col",
+                        plan === p.type ? "border-primary bg-primary/5 shadow-[0_0_30px_rgba(78,222,163,0.1)]" : "hover:border-primary/20"
                       )}
                     >
                       {plan === p.type && (
                          <div className="absolute top-4 right-4 text-primary">
-                            <CheckCircle2 className="w-6 h-6" />
+                            <CheckCircle2 className="w-5 h-5" />
                          </div>
                       )}
                       {p.savings && (
-                        <div className="absolute -top-4 -right-12 bg-secondary text-background py-6 px-16 -rotate-12 transform origin-bottom-right font-display font-black text-[9px] uppercase tracking-widest">
+                        <div className="absolute -top-4 -right-12 bg-secondary text-background py-6 px-16 -rotate-12 transform origin-bottom-right font-display font-black text-[7px] uppercase tracking-widest pointer-events-none">
                           {p.savings}
                         </div>
                       )}
                       
-                      <div className="p-4 bg-white/5 rounded-2xl inline-flex mb-8 group-hover:scale-110 transition-transform">
-                        <p.icon className="w-6 h-6 text-primary" />
+                      <div className="p-3 bg-white/5 rounded-xl inline-flex mb-6 group-hover:scale-110 transition-transform w-fit">
+                        <p.icon className="w-5 h-5 text-primary" />
                       </div>
-                      <h3 className="text-2xl font-display font-bold uppercase tracking-tight mb-2">{p.type} Access</h3>
-                      <p className="text-sm text-on-surface-variant leading-relaxed mb-8 opacity-70">{p.desc}</p>
-                      <p className="text-4xl font-display font-black text-on-surface">{p.price}</p>
+                      
+                      <h3 className="text-xl font-display font-bold uppercase tracking-tight mb-2">{p.name}</h3>
+                      <p className="text-[9px] text-on-surface-variant font-sans uppercase tracking-widest mb-6 opacity-60">{p.desc}</p>
+                      
+                      <div className="space-y-3 mb-8 flex-grow">
+                         {p.features.map((f, i) => (
+                           <div key={i} className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest text-on-surface-variant/80">
+                              <div className="w-1 h-1 rounded-full bg-primary/50" />
+                              {f}
+                           </div>
+                         ))}
+                      </div>
+
+                      <div className="mt-auto pt-6 border-t border-white/5">
+                         <p className="text-3xl font-display font-black text-on-surface">{p.price}</p>
+                         <p className="text-[8px] font-bold uppercase tracking-widest text-on-surface-variant mt-1">/ {p.type === 'yearly' ? 'Year' : (p.type === 'monthly' ? 'Month' : 'Forever')}</p>
+                      </div>
                     </button>
                    ))}
                 </div>

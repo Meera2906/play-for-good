@@ -4,7 +4,7 @@ import { useAuth } from '../components/auth/AuthProvider';
 import type { UserSubscription } from '../types';
 
 export const useSubscription = () => {
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const [subscription, setSubscription] = useState<UserSubscription | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -83,7 +83,7 @@ export const useSubscription = () => {
     }
   };
 
-  const mockActiveSubscription = async () => {
+  const activateMembership = async (planType: 'monthly' | 'yearly', amount: number) => {
     if (!user) return;
     try {
       // First check if it exists
@@ -93,13 +93,14 @@ export const useSubscription = () => {
         .eq('user_id', user.id)
         .maybeSingle();
 
+      const renewalDays = planType === 'monthly' ? 30 : 365;
       const subData = {
         user_id: user.id,
         status: 'active',
-        plan_type: 'monthly' as const,
-        amount: 25.00,
+        plan_type: planType,
+        amount: amount,
         charity_percentage: 10,
-        renewal_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        renewal_date: new Date(Date.now() + renewalDays * 24 * 60 * 60 * 1000).toISOString(),
         start_date: new Date().toISOString(),
       };
 
@@ -116,9 +117,21 @@ export const useSubscription = () => {
         if (inError) throw inError;
       }
 
+      // Also update the profile for quick access status
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          subscription_status: 'active',
+          subscription_tier: planType
+        })
+        .eq('id', user.id);
+
+      if (profileError) throw profileError;
+
+      await refreshProfile();
       await fetchSubscription();
     } catch (err: any) {
-      console.error('Mock subscription error:', err);
+      console.error('Membership activation error:', err);
       throw err;
     }
   };
@@ -131,7 +144,7 @@ export const useSubscription = () => {
     createCheckoutSession,
     createPortalSession,
     updateCharityDetails,
-    mockActiveSubscription,
+    activateMembership,
     isActive: subscription?.status === 'active',
   };
 };

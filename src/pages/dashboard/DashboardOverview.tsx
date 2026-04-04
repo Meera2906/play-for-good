@@ -164,7 +164,7 @@ const DashboardOverview: React.FC = () => {
               >
                 <div className="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_10px_rgba(78,222,163,0.5)]" />
                 <span className="text-primary font-sans text-[10px] font-bold uppercase tracking-[0.2em]">
-                  {isActive ? 'Elite Matrix Active' : 'Matrix Connection Pending'}
+                  {isActive ? 'Premium Membership Active' : 'Membership Activation Pending'}
                 </span>
               </motion.div>
               <h1 className="text-6xl md:text-8xl font-display font-extrabold uppercase tracking-tighter mb-8 leading-[0.85]">
@@ -190,13 +190,13 @@ const DashboardOverview: React.FC = () => {
             
             <div className="flex items-center gap-6">
               <div className="text-right hidden xl:block">
-                <p className="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">Protocol Status</p>
+                <p className="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">Account Status</p>
                 <div className="flex items-center gap-3 justify-end">
                   <span className={cn(
                     "w-2.5 h-2.5 rounded-full",
                     isActive ? "bg-primary shadow-[0_0_15px_rgba(78,222,163,0.5)]" : "bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.5)]"
                   )} />
-                  <span className="font-display font-black uppercase tracking-tight text-lg">{subscription?.status || 'inactive'}</span>
+                  <span className="font-display font-black uppercase tracking-tight text-lg">{subscription?.status || 'Inactive'}</span>
                 </div>
               </div>
               <button className="w-14 h-14 rounded-2xl bg-surface-container-high border border-white/5 flex items-center justify-center hover:bg-white/5 transition-all active:scale-95 group">
@@ -225,7 +225,7 @@ const DashboardOverview: React.FC = () => {
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-4">Your Matrix Numbers</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-4">Your Draw Numbers</p>
                       <div className="flex gap-3">
                         {latestEntry ? (
                           latestEntry.entry_numbers.map((n: number, i: number) => (
@@ -304,7 +304,7 @@ const DashboardOverview: React.FC = () => {
                       <EmptyState 
                         icon={Target}
                         title="No Scores Yet"
-                        description="Your performance matrix is empty. Log your first round to start calculating your entry average for the next monthly draw."
+                        description="Your scoring history is empty. Log your first round to start calculating your entry status for the next monthly draw."
                         className="py-12 border-none bg-transparent"
                       />
                     </div>
@@ -319,8 +319,8 @@ const DashboardOverview: React.FC = () => {
                         <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-6">
                           <Lock className="w-8 h-8 text-primary" />
                         </div>
-                        <h4 className="text-xl font-display font-black uppercase mb-4 tracking-tight">Access Locked</h4>
-                        <p className="text-sm text-on-surface-variant mb-8 leading-relaxed">Join the Elite Matrix to start posting scores and enter monthly draws.</p>
+                        <h4 className="text-xl font-display font-black uppercase mb-4 tracking-tight">Access Restricted</h4>
+                        <p className="text-sm text-on-surface-variant mb-8 leading-relaxed">Upgrade your membership to start posting scores and enter monthly draws.</p>
                         <Link to="/dashboard/subscription" className="inline-block px-8 py-3 bg-primary text-background rounded-full font-bold uppercase tracking-widest text-[10px] hover:scale-105 transition-all active:scale-95">
                           Upgrade Now
                         </Link>

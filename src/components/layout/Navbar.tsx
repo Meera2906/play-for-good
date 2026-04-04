@@ -15,7 +15,7 @@ const Navbar: React.FC = () => {
 
   // Hide navbar on dashboard and admin routes as they have sidebars
   const isDashboard = location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/admin');
-  
+
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
@@ -71,15 +71,15 @@ const Navbar: React.FC = () => {
           {user ? (
             <div className="flex items-center gap-8">
               <ProfileChip showDetails={false} className="hover:scale-105 transition-transform" />
-              <Link 
-                to={profile?.role === 'admin' ? '/admin' : '/dashboard'} 
+              <Link
+                to={profile?.role === 'admin' ? '/admin' : '/dashboard'}
                 className="font-display font-bold text-[10px] uppercase tracking-[0.2em] text-on-surface-variant hover:text-primary transition-colors flex items-center gap-3 group"
               >
                 <LayoutDashboard className="w-4 h-4 group-hover:rotate-12 transition-transform" />
                 Dashboard
               </Link>
-              <button 
-                onClick={signOut} 
+              <button
+                onClick={signOut}
                 className="px-8 py-3 rounded-full border border-white/10 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-white/5 transition-all active:scale-95"
               >
                 Sign Out
@@ -90,7 +90,7 @@ const Navbar: React.FC = () => {
               <Link to="/login" className="font-display font-bold text-[10px] uppercase tracking-[0.2em] text-on-surface-variant hover:text-primary transition-colors">
                 Log in
               </Link>
-              <Link to="/signup" className="bg-gradient-to-br from-primary to-primary-container text-background font-bold px-10 py-4 rounded-full text-[10px] uppercase tracking-[0.2em] hover:scale-105 transition-all shadow-lg shadow-primary/20 active:scale-95 animate-glow-breathing">
+              <Link to="/signup" className="bg-primary text-black font-black px-10 py-4 rounded-full text-[10px] uppercase tracking-[0.2em] hover:scale-110 transition-all shadow-[0_0_30px_rgba(0,209,129,0.5)] hover:shadow-[0_0_50px_rgba(0,209,129,0.7)] active:scale-95 animate-glow-breathing brightness-150">
                 Join Now
               </Link>
             </div>
@@ -106,7 +106,7 @@ const Navbar: React.FC = () => {
       {/* Mobile Menu */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
@@ -129,16 +129,16 @@ const Navbar: React.FC = () => {
               <div className="h-px bg-white/5" />
               {user ? (
                 <div className="flex flex-col gap-6">
-                  <Link 
-                    to={profile?.role === 'admin' ? '/admin' : '/dashboard'} 
-                    className="text-xl font-display font-bold uppercase text-primary flex items-center gap-3" 
+                  <Link
+                    to={profile?.role === 'admin' ? '/admin' : '/dashboard'}
+                    className="text-xl font-display font-bold uppercase text-primary flex items-center gap-3"
                     onClick={() => setIsOpen(false)}
                   >
                     <LayoutDashboard className="w-5 h-5" />
                     Dashboard
                   </Link>
-                  <button 
-                    onClick={() => { signOut(); setIsOpen(false); }} 
+                  <button
+                    onClick={() => { signOut(); setIsOpen(false); }}
                     className="text-on-surface-variant flex items-center gap-4 text-sm font-bold uppercase tracking-widest hover:text-red-500 transition-colors"
                   >
                     <LogOut className="w-5 h-5" /> Sign Out

@@ -11,7 +11,7 @@ export interface User {
 
 export interface Profile extends User {
   subscription_status: 'active' | 'inactive' | 'cancelled' | 'lapsed';
-  subscription_tier: 'monthly' | 'yearly' | 'none';
+  subscription_tier: 'monthly' | 'yearly' | 'free' | 'none';
   selected_charity_id?: string;
   onboarding_completed?: boolean;
   lifetime_winnings: number;
@@ -89,7 +89,7 @@ export interface UserSubscription {
   id: string;
   user_id: string;
   charity_id?: string;
-  plan_type: 'monthly' | 'yearly';
+  plan_type: 'monthly' | 'yearly' | 'free';
   amount: number;
   charity_percentage: number;
   status: 'active' | 'inactive' | 'cancelled' | 'lapsed';

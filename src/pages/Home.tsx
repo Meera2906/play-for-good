@@ -71,7 +71,7 @@ const Home: React.FC = () => {
               <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 rounded-full blur opacity-50 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-pulse" />
               <div className="relative inline-flex items-center gap-4 px-6 py-2 rounded-full border border-white/10 bg-black/40 backdrop-blur-2xl w-fit shadow-[0_0_15px_rgba(78,222,163,0.1)]">
                 <div className="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_10px_rgba(78,222,163,0.8)]" />
-                <span className="font-sans text-[10px] font-bold uppercase tracking-[0.4em] text-primary">The Sovereign Catalyst</span>
+                <span className="font-sans text-[10px] font-bold uppercase tracking-[0.4em] text-primary">Activate The Mission</span>
               </div>
             </div>
 
@@ -103,16 +103,16 @@ const Home: React.FC = () => {
       <section className="py-24 px-6 md:px-12 border-y border-white/5 bg-surface-container-lowest">
         <div className="max-w-[1920px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 text-center md:text-left">
           <div className="space-y-2">
-            <p className="font-display text-5xl font-black text-secondary tracking-tighter">£2.4M</p>
-            <p className="font-sans text-sm uppercase tracking-widest text-on-surface-variant">Donated to Global Causes</p>
+            <p className="font-display text-7xl font-black text-secondary tracking-tighter">£2.4M</p>
+            <p className="font-sans text-base uppercase tracking-widest text-on-surface-variant">Donated to Global Causes</p>
           </div>
           <div className="space-y-2">
-            <p className="font-display text-5xl font-black text-primary tracking-tighter">15k+</p>
-            <p className="font-sans text-sm uppercase tracking-widest text-on-surface-variant">Active Elite Members</p>
+            <p className="font-display text-7xl font-black text-primary tracking-tighter">15k+</p>
+            <p className="font-sans text-base uppercase tracking-widest text-on-surface-variant">Active Elite Members</p>
           </div>
           <div className="space-y-2">
-            <p className="font-display text-5xl font-black text-on-surface tracking-tighter">250+</p>
-            <p className="font-sans text-sm uppercase tracking-widest text-on-surface-variant">Vetted Charity Partners</p>
+            <p className="font-display text-7xl font-black text-on-surface tracking-tighter">250+</p>
+            <p className="font-sans text-base uppercase tracking-widest text-on-surface-variant">Vetted Charity Partners</p>
           </div>
         </div>
       </section>

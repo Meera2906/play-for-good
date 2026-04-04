@@ -35,15 +35,38 @@ const ProfileChip: React.FC<ProfileChipProps> = ({ className, showDetails = true
       
       {showDetails && (
         <div className="flex flex-col items-start gap-1">
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface group-hover:text-primary transition-colors truncate max-w-[120px]">
-              {profile.full_name}
-            </span>
-            <RoleBadge role={profile.role} className="scale-75 origin-left" />
+          <div className="flex items-center gap-1.5">
+            {profile.role === 'admin' ? (
+              <span className="text-[7px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-md bg-secondary/20 text-secondary border border-secondary/30 shadow-[0_0_15px_rgba(212,175,55,0.1)]">
+                System Admin
+              </span>
+            ) : profile.subscription_status === 'active' ? (
+              <span className={cn(
+                "text-[7px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-md border",
+                profile.subscription_tier === 'yearly' 
+                  ? "bg-secondary/20 text-secondary border-secondary/30 shadow-[0_0_15px_rgba(212,175,55,0.1)]" 
+                  : "bg-primary/20 text-primary border-primary/30 shadow-[0_0_15px_rgba(78,222,163,0.1)]"
+              )}>
+                {profile.subscription_tier === 'yearly' 
+                  ? 'Sovereign Member' 
+                  : profile.subscription_tier === 'monthly' 
+                    ? 'Elite Member' 
+                    : 'Spectator Member'}
+              </span>
+            ) : profile.subscription_status === 'cancelled' ? (
+              <span className="text-[7px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-md bg-red-500/10 text-red-500 border border-red-500/30">
+                Cancelled
+              </span>
+            ) : profile.subscription_status === 'lapsed' ? (
+              <span className="text-[7px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-500 border border-amber-500/30">
+                Lapsed
+              </span>
+            ) : (
+              <span className="text-[7px] font-bold uppercase tracking-[0.2em] text-on-surface-variant/50 px-2 py-0.5 border border-white/5 rounded-md">
+                Basic Member
+              </span>
+            )}
           </div>
-          <span className="text-[8px] font-medium text-on-surface-variant tracking-wider truncate max-w-[150px]">
-            {profile.email}
-          </span>
         </div>
       )}
     </div>
