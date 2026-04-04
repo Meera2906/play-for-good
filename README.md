@@ -2,11 +2,7 @@
 
 **A premium subscription-based golf platform combining competitive score tracking, monthly reward draws, and meaningful charity contributions.**
 
-[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white&style=flat-square)](https://react.dev)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?logo=typescript&logoColor=white&style=flat-square)](https://www.typescriptlang.org)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?logo=tailwindcss&logoColor=white&style=flat-square)](https://tailwindcss.com)
-[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase&logoColor=white&style=flat-square)](https://supabase.com)
-[![Vercel](https://img.shields.io/badge/Deployed_on-Vercel-000000?logo=vercel&logoColor=white&style=flat-square)](https://play-for-good-hazel.vercel.app)
+[![Tech Stack](https://skillicons.dev/icons?i=react,ts,tailwind,vite,supabase,postgres,vercel&theme=dark)](https://skillicons.dev)
 
 🔗 **Live Demo:** [play-for-good-hazel.vercel.app](https://play-for-good-hazel.vercel.app/)
 
