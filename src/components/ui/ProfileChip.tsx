@@ -67,6 +67,9 @@ const ProfileChip: React.FC<ProfileChipProps> = ({ className, showDetails = true
               </span>
             )}
           </div>
+          <p className="text-xs font-display font-bold uppercase tracking-tight text-on-surface">
+            {profile.full_name}
+          </p>
         </div>
       )}
     </div>

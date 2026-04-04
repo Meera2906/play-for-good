@@ -22,6 +22,7 @@ const CharityDetail: React.FC = () => {
   const [selecting, setSelecting] = useState(false);
   const [error, setError] = useState(false);
   const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (slug) {
@@ -316,11 +317,16 @@ const CharityDetail: React.FC = () => {
               <button 
                 onClick={() => {
                   navigator.clipboard.writeText(window.location.href);
-                  alert('Profile link copied to matrix clipboard.');
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
                 }}
-                className="w-full py-4 rounded-xl border border-white/10 text-[9px] font-bold uppercase tracking-widest hover:bg-white/5 transition-all"
+                className="w-full py-4 rounded-xl border border-white/10 text-[9px] font-bold uppercase tracking-widest hover:bg-white/5 transition-all flex items-center justify-center gap-2"
               >
-                Share Identity Node
+                {copied ? (
+                  <><CheckCircle2 className="w-3 h-3 text-primary" /><span className="text-primary">Link Copied</span></>
+                ) : (
+                  'Share Profile'
+                )}
               </button>
             </div>
 

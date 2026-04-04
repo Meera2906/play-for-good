@@ -57,6 +57,35 @@ const Subscriptions: React.FC = () => {
       .reduce((acc, s) => acc + (s.amount || 0), 0)
   };
 
+  const handleDownload = () => {
+    if (subscriptions.length === 0) return;
+    
+    const headers = ['User', 'Email', 'Plan', 'Status', 'Amount', 'Charity', 'Renewal Date', 'Created At'];
+    const csvContent = [
+      headers.join(','),
+      ...subscriptions.map(sub => [
+        `"${sub.user?.full_name || 'Matrix User'}"`,
+        `"${sub.user?.email || 'N/A'}"`,
+        `"${sub.plan_type}"`,
+        `"${sub.status}"`,
+        sub.amount,
+        `"${sub.charity?.name || 'Unassigned'}"`,
+        `"${formatDate(sub.renewal_date)}"`,
+        `"${formatDate(sub.created_at)}"`
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `subscriptions_export_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="max-w-[1600px] mx-auto p-12">
       {/* Header */}
@@ -137,8 +166,12 @@ const Subscriptions: React.FC = () => {
                 </button>
               ))}
             </div>
-            <button className="p-4 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/5 transition-all">
-              <Download className="w-5 h-5 text-on-surface-variant" />
+            <button 
+              onClick={handleDownload}
+              className="p-4 bg-white/5 hover:bg-primary/20 hover:text-primary rounded-2xl border border-white/5 transition-all group"
+              title="Download Data Matrix"
+            >
+              <Download className="w-5 h-5 group-hover:scale-110 transition-transform" />
             </button>
           </div>
         </div>

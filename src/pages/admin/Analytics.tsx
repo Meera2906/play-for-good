@@ -21,10 +21,30 @@ const Analytics: React.FC = () => {
     charityImpact: [],
     userSegments: []
   });
+  const [dateRange, setDateRange] = useState('6M');
 
   useEffect(() => {
     fetchAnalytics();
-  }, []);
+  }, [dateRange]);
+
+  const handleExport = () => {
+    const csvContent = [
+      'Month,Revenue,Growth',
+      ...data.revenueHistory.map((h: any) => `${h.month},${h.revenue},${h.growth}`)
+    ].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `analytics_export_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+  };
+
+  const handleFilter = () => {
+    const ranges = ['1M', '3M', '6M', '1Y', 'ALL'];
+    const nextIndex = (ranges.indexOf(dateRange) + 1) % ranges.length;
+    setDateRange(ranges[nextIndex]);
+  };
 
   const fetchAnalytics = async () => {
     setLoading(true);
@@ -95,11 +115,17 @@ const Analytics: React.FC = () => {
         </div>
 
         <div className="flex gap-4">
-           <button className="px-8 py-4 bg-white/5 border border-white/5 rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center gap-3 hover:bg-white/10 transition-all">
-              <Download className="w-4 h-4 text-primary" /> Export Matrix Data
+           <button 
+            onClick={handleExport}
+            className="px-8 py-4 bg-white/5 border border-white/5 rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center gap-3 hover:bg-primary/10 hover:text-primary transition-all group"
+           >
+              <Download className="w-4 h-4 group-hover:scale-110 transition-transform" /> Export Matrix Data
            </button>
-           <button className="px-8 py-4 bg-primary text-background rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center gap-3 hover:scale-105 transition-all shadow-xl shadow-primary/20">
-              <Calendar className="w-4 h-4" /> Filter Protocol Period
+           <button 
+            onClick={handleFilter}
+            className="px-8 py-4 bg-primary text-background rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center gap-3 hover:scale-105 transition-all shadow-xl shadow-primary/20"
+           >
+              <Calendar className="w-4 h-4" /> Period: {dateRange}
            </button>
         </div>
       </div>

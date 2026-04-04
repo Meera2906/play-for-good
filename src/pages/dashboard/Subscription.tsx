@@ -18,7 +18,8 @@ const Subscription: React.FC = () => {
     createCheckoutSession, 
     createPortalSession,
     activateMembership,
-    isActive 
+    isActive,
+    isPremium
   } = useSubscription();
 
   const [processing, setProcessing] = React.useState<string | null>(null);
@@ -66,7 +67,7 @@ const Subscription: React.FC = () => {
     );
   }
 
-  const currentPlanName = subscription?.plan_type === 'yearly' ? 'Sovereign Yearly' : 'Elite Monthly';
+  const currentPlanName = subscription?.plan_type === 'yearly' ? 'Sovereign Yearly' : (subscription?.plan_type === 'monthly' ? 'Elite Monthly' : 'Spectator Node');
 
   return (
     <div className="max-w-6xl mx-auto p-6 md:p-12 lg:p-20">
@@ -77,7 +78,7 @@ const Subscription: React.FC = () => {
             <ShieldCheck className="w-4 h-4 text-primary" />
             <span className="text-primary font-sans text-[10px] font-bold uppercase tracking-[0.2em]">Secure Membership Node</span>
           </div>
-          <h1 className="text-6xl md:text-8xl font-display font-black uppercase tracking-tighter leading-[0.85]">
+          <h1 className="text-5xl md:text-6xl lg:text-8xl font-display font-black uppercase tracking-tighter leading-[0.85]">
             Membership <span className="text-primary italic">Control.</span>
           </h1>
           <p className="mt-8 text-lg text-on-surface-variant max-w-2xl leading-relaxed">
@@ -117,9 +118,12 @@ const Subscription: React.FC = () => {
               <div className="bg-surface-container-low/50 p-12">
                 <div className="flex items-center justify-between mb-12">
                   <h2 className="text-3xl font-display font-black uppercase tracking-tight">Current Subscription</h2>
-                  <div className="flex items-center gap-2 px-6 py-2 bg-primary/20 rounded-full text-primary text-[10px] font-bold uppercase tracking-widest">
+                  <div className={cn(
+                    "flex items-center gap-2 px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest",
+                    isPremium ? "bg-primary/20 text-primary" : "bg-secondary/20 text-secondary"
+                  )}>
                     <Award className="w-4 h-4" />
-                    Premium Access
+                    {isPremium ? 'Premium Access' : 'Basic Access'}
                   </div>
                 </div>
 
@@ -127,7 +131,7 @@ const Subscription: React.FC = () => {
                   <div className="space-y-8">
                     <div>
                       <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block mb-3">Billing Cycle</span>
-                      <p className="text-2xl font-display font-bold uppercase">{subscription?.plan_type === 'yearly' ? 'Yearly Billing' : 'Monthly Billing'}</p>
+                      <p className="text-2xl font-display font-bold uppercase">{subscription?.plan_type === 'yearly' ? 'Yearly Billing' : (subscription?.plan_type === 'monthly' ? 'Monthly Billing' : 'Free Tier')}</p>
                     </div>
                     <div>
                       <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block mb-3">Next Payment Date</span>

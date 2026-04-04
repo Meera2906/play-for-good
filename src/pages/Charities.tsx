@@ -208,9 +208,9 @@ const Charities: React.FC = () => {
                             )}
                           </button>
                         ) : (
-                          <button className="flex-1 py-4 rounded-full bg-gradient-to-br from-primary to-primary-container text-background text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:scale-105 transition-all active:scale-95 opacity-50 cursor-not-allowed">
+                          <Link to="/login" className="flex-1 py-4 rounded-full bg-gradient-to-br from-primary to-primary-container text-background text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:scale-105 transition-all active:scale-95">
                             Login to Select
-                          </button>
+                          </Link>
                         )}
                       </div>
                     </div>

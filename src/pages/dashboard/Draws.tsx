@@ -11,7 +11,7 @@ import type { Draw } from '../../types';
 
 const DrawsHistory: React.FC = () => {
   const { user } = useAuth();
-  const { isActive, loading: subLoading } = useSubscription();
+  const { isActive, isPremium, loading: subLoading } = useSubscription();
   const [draws, setDraws] = useState<Draw[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -69,14 +69,14 @@ const DrawsHistory: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative">
-        {!isActive && (
+        {!isPremium && (
           <div className="absolute inset-0 z-50 bg-background/60 backdrop-blur-md flex items-center justify-center rounded-[2.5rem] border border-dashed border-primary/20">
             <div className="text-center max-w-sm px-10">
               <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_40px_rgba(78,222,163,0.2)]">
                 <Lock className="w-10 h-10 text-primary" />
               </div>
               <h2 className="text-3xl font-display font-black uppercase mb-4 tracking-tight">Draw Matrix Locked</h2>
-              <p className="text-on-surface-variant mb-10 text-balance">Historical draw data and eligibility require an active Matrix connection.</p>
+              <p className="text-on-surface-variant mb-10 text-balance">Historical draw data and eligibility require a premium Matrix connection.</p>
               <Link to="/dashboard/subscription" className="px-10 py-5 bg-primary text-background rounded-full font-bold uppercase tracking-widest text-xs hover:scale-105 transition-all active:scale-95 shadow-[0_0_30px_rgba(78,222,163,0.3)]">
                 Connect to Matrix
               </Link>
@@ -114,7 +114,7 @@ const DrawsHistory: React.FC = () => {
                     </div>
                     <div>
                       <h3 className="text-2xl font-display font-bold uppercase tracking-tight mb-1">
-                        Draw: <span className={won ? "text-secondary italic" : "text-primary italic"}>{draw.month}</span>
+                        Draw: <span className={won ? "text-secondary italic" : "text-primary italic"}>{draw.draw_month || draw.draw_year}</span>
                       </h3>
                       <p className="text-sm text-on-surface-variant font-sans">
                         Finalized: {formatDate(draw.created_at)}
@@ -161,7 +161,7 @@ const DrawsHistory: React.FC = () => {
                 description="The monthly algorithmic draw has not been processed for the current cycle. Your results and prize eligibility will be logged here as soon as the protocol verification cycle completes."
                 className="py-20 border-none bg-transparent"
               />
-              {!isActive && (
+              {!isPremium && (
                 <p className="mt-8 text-[10px] font-bold uppercase tracking-[0.4em] text-on-surface-variant animate-pulse">
                   System Sync: Waiting for Protocol Authorization
                 </p>

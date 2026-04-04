@@ -136,6 +136,29 @@ export const useSubscription = () => {
     }
   };
 
+  const cancelMembership = async () => {
+    if (!user || !subscription) return;
+    try {
+      const { error: subError } = await supabase
+        .from('subscriptions')
+        .update({ status: 'cancelled' })
+        .eq('id', subscription.id);
+      if (subError) throw subError;
+
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ subscription_status: 'cancelled', subscription_tier: 'none' })
+        .eq('id', user.id);
+      if (profileError) throw profileError;
+
+      await refreshProfile();
+      await fetchSubscription();
+    } catch (err: any) {
+      console.error('Cancellation error:', err);
+      throw err;
+    }
+  };
+
   return {
     subscription,
     loading,
@@ -145,6 +168,8 @@ export const useSubscription = () => {
     createPortalSession,
     updateCharityDetails,
     activateMembership,
+    cancelMembership,
     isActive: subscription?.status === 'active',
+    isPremium: subscription?.status === 'active' && subscription?.plan_type !== 'free',
   };
 };

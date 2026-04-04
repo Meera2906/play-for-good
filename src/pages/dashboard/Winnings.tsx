@@ -12,7 +12,7 @@ import ProofUpload from '../../components/ui/ProofUpload';
 
 const Winnings: React.FC = () => {
   const { user, profile } = useAuth();
-  const { isActive, loading: subLoading } = useSubscription();
+  const { isActive, isPremium, loading: subLoading } = useSubscription();
   const [entries, setEntries] = useState<DrawEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -77,14 +77,14 @@ const Winnings: React.FC = () => {
       </div>
 
       <div className="relative">
-        {!isActive && (
+        {!isPremium && (
           <div className="absolute inset-x-0 top-0 z-50 bg-background/60 backdrop-blur-md flex items-center justify-center rounded-[2.5rem] border border-dashed border-secondary/20 min-h-[400px]">
             <div className="text-center max-w-sm px-10">
               <div className="w-20 h-20 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_40px_rgba(233,195,73,0.2)]">
                 <Lock className="w-10 h-10 text-secondary" />
               </div>
               <h2 className="text-3xl font-display font-black uppercase mb-4 tracking-tight">Vault Locked</h2>
-              <p className="text-on-surface-variant mb-10 text-balance">Only active Matrix members can view participation and claim rewards.</p>
+              <p className="text-on-surface-variant mb-10 text-balance">Only premium Matrix members can view participation and claim rewards.</p>
               <Link to="/dashboard/subscription" className="px-10 py-5 bg-secondary text-background rounded-full font-bold uppercase tracking-widest text-xs hover:scale-105 transition-all active:scale-95 shadow-[0_0_30px_rgba(233,195,73,0.3)]">
                 Upgrade Access
               </Link>
@@ -92,7 +92,7 @@ const Winnings: React.FC = () => {
           </div>
         )}
 
-        {pendingProofsCount > 0 && isActive && (
+        {pendingProofsCount > 0 && isPremium && (
           <div className="mb-10 p-6 bg-secondary/10 border border-secondary/30 rounded-2xl flex items-start gap-4">
             <AlertCircle className="w-6 h-6 text-secondary flex-shrink-0 mt-1" />
             <div>
@@ -112,7 +112,7 @@ const Winnings: React.FC = () => {
               description="Your rewards ledger is currently unpopulated. Once the protocol verification cycle completes, your results and prize eligibility will be logged here."
               className="py-20 border-none bg-transparent"
             />
-            {!isActive && (
+            {!isPremium && (
               <p className="mt-8 text-[10px] font-bold uppercase tracking-[0.4em] text-on-surface-variant animate-pulse">
                 Access Locked: Protocol Authorization Required
               </p>

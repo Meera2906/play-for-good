@@ -19,6 +19,7 @@ type WinnerProof = {
 const WinnersVerification: React.FC = () => {
   const [proofs, setProofs] = useState<WinnerProof[]>([]);
   const [loading, setLoading] = useState(true);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProofs();
@@ -98,7 +99,8 @@ const WinnersVerification: React.FC = () => {
       fetchProofs();
     } catch (err) {
       console.error('Failed to update proof status:', err);
-      alert('Failed to update proof. Check console.');
+      setActionError('Update failed. Please try again.');
+      setTimeout(() => setActionError(null), 4000);
     }
   };
 
@@ -124,6 +126,13 @@ const WinnersVerification: React.FC = () => {
       <p className="text-on-surface-variant max-w-2xl mb-12">
         Review and verify algorithmic draw winner proofs (scorecards). Approved payouts will be automatically dispatched.
       </p>
+
+      {actionError && (
+        <div className="mb-8 p-4 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-500 text-sm font-sans flex items-center gap-3">
+          <XCircle className="w-4 h-4 flex-shrink-0" />
+          {actionError}
+        </div>
+      )}
 
       {/* Pending Proofs */}
       <h3 className="text-xl font-display font-bold uppercase tracking-tight mb-6 mt-12 flex items-center gap-3">
@@ -155,7 +164,7 @@ const WinnersVerification: React.FC = () => {
                 </div>
                 <div className="mb-6">
                   <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant mb-1">Draw Context</p>
-                  <p className="text-sm font-medium">Draw: {proof.draw?.month}</p>
+                  <p className="text-sm font-medium">Draw: {proof.draw?.draw_month || proof.draw?.month}</p>
                   <p className="text-xs text-on-surface-variant">Submitted {formatDate(proof.created_at)}</p>
                 </div>
                 
@@ -202,7 +211,7 @@ const WinnersVerification: React.FC = () => {
                   <p className="text-xs text-on-surface-variant">{proof.user?.email}</p>
                 </td>
                 <td className="px-8 py-6">
-                  <p className="font-medium text-sm">{proof.draw?.month}</p>
+                  <p className="font-medium text-sm">{proof.draw?.draw_month || proof.draw?.month}</p>
                 </td>
                 <td className="px-8 py-6">
                   <span className={cn(

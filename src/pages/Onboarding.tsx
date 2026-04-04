@@ -28,7 +28,7 @@ const Onboarding: React.FC = () => {
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [selectedCharity, setSelectedCharity] = useState<Charity | null>(null);
   const [percentage, setPercentage] = useState(10);
-  const [plan, setPlan] = useState<'monthly' | 'yearly' | 'free'>('monthly');
+  const [plan, setPlan] = useState<'monthly' | 'yearly' | 'free'>('free');
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
@@ -79,7 +79,8 @@ const Onboarding: React.FC = () => {
         .eq('user_id', user.id)
         .maybeSingle();
 
-      const renewalDays = plan === 'monthly' ? 30 : (plan === 'yearly' ? 365 : 10000); // 10000 for free to keep it active
+      // 10000 days for free to keep it active, otherwise normal cycle
+      const renewalDays = plan === 'monthly' ? 30 : (plan === 'yearly' ? 365 : 10000); 
       const subData = {
         user_id: user.id,
         charity_id: selectedCharity.id,
@@ -113,7 +114,7 @@ const Onboarding: React.FC = () => {
           onboarding_completed: true, 
           selected_charity_id: selectedCharity.id,
           subscription_status: 'active',
-          subscription_tier: plan
+          subscription_tier: plan === 'free' ? 'free' : plan
         })
         .eq('id', user.id);
 

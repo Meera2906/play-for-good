@@ -205,17 +205,24 @@ const AdminUsers: React.FC = () => {
                     </td>
                     <td className="px-10 py-8">
                       <div className="flex flex-col gap-1">
-                        <p className={cn(
-                          "text-sm font-bold uppercase tracking-widest",
-                          u.subscription?.[0]?.status === 'active' ? "text-primary" : "text-on-surface-variant opacity-50"
-                        )}>
-                          {u.subscription?.[0]?.status || 'No Subscription'}
-                        </p>
-                        {u.subscription?.[0] && (
-                           <p className="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest">
-                             {u.subscription?.[0]?.plan_type} Tier
-                           </p>
-                        )}
+                        {(() => {
+                          const sub = Array.isArray(u.subscription) ? u.subscription[0] : u.subscription;
+                          return (
+                            <>
+                              <p className={cn(
+                                "text-sm font-bold uppercase tracking-widest",
+                                sub?.status === 'active' ? "text-primary" : "text-on-surface-variant opacity-50"
+                              )}>
+                                {sub?.status || u.subscription_status || 'No Subscription'}
+                              </p>
+                              {sub && (
+                                <p className="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest">
+                                  {sub.plan_type} Tier
+                                </p>
+                              )}
+                            </>
+                          );
+                        })()}
                       </div>
                     </td>
                     <td className="px-10 py-8">

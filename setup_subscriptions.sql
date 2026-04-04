@@ -1,10 +1,10 @@
--- Create subscriptions table
+-- 1. Create subscriptions table
 CREATE TABLE IF NOT EXISTS public.subscriptions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     stripe_customer_id TEXT,
     stripe_subscription_id TEXT,
-    plan_type TEXT CHECK (plan_type IN ('monthly', 'yearly')),
+    plan_type TEXT CHECK (plan_type IN ('monthly', 'yearly', 'free')),
     status TEXT NOT NULL DEFAULT 'inactive',
     amount NUMERIC(10, 2),
     charity_id UUID REFERENCES public.charities(id),
@@ -15,6 +15,11 @@ CREATE TABLE IF NOT EXISTS public.subscriptions (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()),
     CONSTRAINT subscriptions_user_id_key UNIQUE(user_id)
 );
+
+-- 2. Update profiles table constraint to allow Spectator tier
+ALTER TABLE public.profiles DROP CONSTRAINT IF EXISTS profiles_subscription_tier_check;
+ALTER TABLE public.profiles ADD CONSTRAINT profiles_subscription_tier_check 
+CHECK (subscription_tier IN ('monthly', 'yearly', 'free', 'none'));
 
 -- If you are seeing a "no unique or exclusion constraint" error, run this:
 -- ALTER TABLE public.subscriptions ADD CONSTRAINT subscriptions_user_id_key UNIQUE (user_id);

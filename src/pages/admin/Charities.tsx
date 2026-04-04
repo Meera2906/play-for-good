@@ -130,6 +130,25 @@ const AdminCharities: React.FC = () => {
     }
   };
 
+  const handleDelete = async (id: string, name: string) => {
+    if (!window.confirm(`Are you absolutely sure you want to delete ${name}? This action is irreversible and may affect existing subscriptions.`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('charities')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      await fetchCharities();
+    } catch (error) {
+      console.error('Error deleting charity:', error);
+      alert('Failed to delete charity. It may be referenced by existing subscriptions or donations.');
+    }
+  };
+
   const filteredCharities = charities.filter(c => 
     c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     c.category.toLowerCase().includes(searchTerm.toLowerCase())
@@ -270,6 +289,12 @@ const AdminCharities: React.FC = () => {
                             className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors mt-2"
                           >
                             <Edit3 className="w-3 h-3" /> Edit Profile
+                          </button>
+                          <button 
+                            onClick={() => handleDelete(charity.id, charity.name)}
+                            className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest text-on-surface-variant hover:text-red-500 transition-colors mt-1"
+                          >
+                            <Trash2 className="w-3 h-3" /> Terminate Node
                           </button>
                        </div>
                     </td>

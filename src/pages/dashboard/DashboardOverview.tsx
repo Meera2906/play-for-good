@@ -16,7 +16,7 @@ import type { Score, Charity } from '../../types';
 
 const DashboardOverview: React.FC = () => {
   const { user, profile } = useAuth();
-  const { subscription, isActive, loading: subLoading } = useSubscription();
+  const { subscription, isActive, isPremium, loading: subLoading } = useSubscription();
   usePageTitle('Control Hub');
   const [scores, setScores] = useState<Score[]>([]);
   const [charities, setCharities] = useState<Charity[]>([]);
@@ -98,8 +98,8 @@ const DashboardOverview: React.FC = () => {
     e.preventDefault();
     if (!user || !profile) return;
 
-    if (!isActive) {
-      setMessage({ type: 'error', text: 'Active subscription required to submit scores.' });
+    if (!isPremium) {
+      setMessage({ type: 'error', text: 'Premium membership required to submit scores.' });
       return;
     }
 
@@ -164,10 +164,12 @@ const DashboardOverview: React.FC = () => {
               >
                 <div className="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_10px_rgba(78,222,163,0.5)]" />
                 <span className="text-primary font-sans text-[10px] font-bold uppercase tracking-[0.2em]">
-                  {isActive ? 'Premium Membership Active' : 'Membership Activation Pending'}
+                  {isActive 
+                    ? `${(subscription?.plan_type === 'yearly' ? 'Sovereign' : subscription?.plan_type === 'monthly' ? 'Elite' : 'Spectator')} Membership Active` 
+                    : 'Membership Activation Pending'}
                 </span>
               </motion.div>
-              <h1 className="text-6xl md:text-8xl font-display font-extrabold uppercase tracking-tighter mb-8 leading-[0.85]">
+              <h1 className="text-4xl md:text-6xl lg:text-8xl font-display font-extrabold uppercase tracking-tighter mb-8 leading-[0.85]">
                 Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary italic">{profile?.full_name?.split(' ')[0]}</span>
               </h1>
               <div className="flex flex-wrap items-center gap-6">
@@ -196,7 +198,9 @@ const DashboardOverview: React.FC = () => {
                     "w-2.5 h-2.5 rounded-full",
                     isActive ? "bg-primary shadow-[0_0_15px_rgba(78,222,163,0.5)]" : "bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.5)]"
                   )} />
-                  <span className="font-display font-black uppercase tracking-tight text-lg">{subscription?.status || 'Inactive'}</span>
+                  <span className="font-display font-black uppercase tracking-tight text-lg">
+                    {subscription?.plan_type === 'yearly' ? 'Sovereign' : subscription?.plan_type === 'monthly' ? 'Elite' : (subscription?.plan_type === 'free' ? 'Spectator' : 'Inactive')}
+                  </span>
                 </div>
               </div>
               <button className="w-14 h-14 rounded-2xl bg-surface-container-high border border-white/5 flex items-center justify-center hover:bg-white/5 transition-all active:scale-95 group">
@@ -235,7 +239,7 @@ const DashboardOverview: React.FC = () => {
                           ))
                         ) : (
                           <div className="flex items-center gap-2 text-on-surface-variant text-[10px] font-bold uppercase tracking-widest px-4 py-3 bg-white/5 rounded-xl border border-dashed border-white/10">
-                            {isActive ? 'Entry Pending Next Draw' : <><Lock className="w-3 h-3" /> Subscription Required</>}
+                            {isPremium ? 'Entry Pending Next Draw' : <><Lock className="w-3 h-3" /> Subscription Required</>}
                           </div>
                         )}
                       </div>
@@ -313,7 +317,7 @@ const DashboardOverview: React.FC = () => {
 
                 {/* Submit Score Form */}
                 <div className="glass-card p-1 rounded-[2.5rem] relative overflow-hidden">
-                  {!isActive && (
+                  {!isPremium && (
                     <div className="absolute inset-0 z-50 bg-background/60 backdrop-blur-sm flex items-center justify-center p-10 text-center">
                       <div className="max-w-xs">
                         <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -353,7 +357,7 @@ const DashboardOverview: React.FC = () => {
                           value={newScore.points}
                           onChange={(e) => setNewScore({...newScore, points: e.target.value})}
                           placeholder="e.g. 38"
-                          disabled={!isActive}
+                          disabled={!isPremium}
                           className="w-full px-6 py-4 bg-background border border-white/5 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all font-sans disabled:opacity-50"
                         />
                       </div>
@@ -364,13 +368,13 @@ const DashboardOverview: React.FC = () => {
                           value={newScore.course}
                           onChange={(e) => setNewScore({...newScore, course: e.target.value})}
                           placeholder="e.g. St Andrews Old Course"
-                          disabled={!isActive}
+                          disabled={!isPremium}
                           className="w-full px-6 py-4 bg-background border border-white/5 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all font-sans disabled:opacity-50"
                         />
                       </div>
                       <button 
                         type="submit" 
-                        disabled={submitting || !isActive}
+                        disabled={submitting || !isPremium}
                         className="w-full py-5 rounded-full bg-gradient-to-br from-primary to-primary-container text-background font-bold text-lg flex items-center justify-center gap-3 hover:scale-105 transition-all active:scale-95 disabled:opacity-50"
                       >
                         {submitting ? 'Submitting...' : 'Submit Score'}
@@ -405,29 +409,37 @@ const DashboardOverview: React.FC = () => {
                   <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
                 </div>
                 <div className="p-10 -mt-16 relative z-10">
-                  <div className="w-20 h-20 bg-surface-container-low rounded-3xl border border-white/10 p-3 mb-6 shadow-xl">
-                    <img src={activeCharity?.logo_url || "https://picsum.photos/seed/logo/100/100"} alt="Logo" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
-                  </div>
-                  <h3 className="text-2xl font-display font-bold uppercase mb-3 tracking-tight">
-                    {activeCharity?.name || "Select a Charity"}
-                  </h3>
-                  <p className="text-sm text-on-surface-variant mb-8 line-clamp-2 font-sans leading-relaxed">
-                    {activeCharity?.description || "Choose the cause your performance will support in the next draw."}
-                  </p>
-                  <div className="flex items-center justify-between p-5 bg-surface-container-low rounded-2xl mb-8 border border-white/5">
-                    <div className="text-center">
-                      <p className="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">Your Impact</p>
-                      <p className="font-display font-bold text-xl text-primary">{formatCurrency(profile?.total_impact || 0)}</p>
+                  {activeCharity ? (
+                    <>
+                      <div className="w-20 h-20 bg-surface-container-low rounded-3xl border border-white/10 p-3 mb-6 shadow-xl">
+                        <img src={activeCharity.logo_url} alt="Logo" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+                      </div>
+                      <h3 className="text-2xl font-display font-bold uppercase mb-3 tracking-tight">{activeCharity.name}</h3>
+                      <p className="text-sm text-on-surface-variant mb-8 line-clamp-2 font-sans leading-relaxed">{activeCharity.description}</p>
+                      <div className="flex items-center justify-between p-5 bg-surface-container-low rounded-2xl mb-8 border border-white/5">
+                        <div className="text-center">
+                          <p className="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">Your Impact</p>
+                          <p className="font-display font-bold text-xl text-primary">{formatCurrency(profile?.total_impact || 0)}</p>
+                        </div>
+                        <div className="w-px h-10 bg-white/5" />
+                        <div className="text-center">
+                          <p className="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">Global Total</p>
+                          <p className="font-display font-bold text-xl text-on-surface">{formatCurrency(activeCharity.total_raised || 0)}</p>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="py-8 text-center">
+                      <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Heart className="w-8 h-8 text-primary/50" />
+                      </div>
+                      <h3 className="text-lg font-display font-bold uppercase mb-2 tracking-tight">No Charity Selected</h3>
+                      <p className="text-xs text-on-surface-variant mb-6 leading-relaxed">Pick a cause to direct your subscription contribution toward.</p>
                     </div>
-                    <div className="w-px h-10 bg-white/5" />
-                    <div className="text-center">
-                      <p className="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">Global Total</p>
-                      <p className="font-display font-bold text-xl text-on-surface">{formatCurrency(activeCharity?.total_raised || 0)}</p>
-                    </div>
-                  </div>
+                  )}
                   <Link to="/dashboard/charity" className="w-full py-4 rounded-full border border-white/10 text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-white/5 transition-all active:scale-95">
                     <Heart className="w-4 h-4 text-red-500" />
-                    Change Charity
+                    {activeCharity ? 'Change Charity' : 'Select a Charity'}
                   </Link>
                 </div>
               </div>
@@ -438,8 +450,11 @@ const DashboardOverview: React.FC = () => {
               <div className="bg-surface-container-low rounded-[2.4rem] p-10 border border-secondary/20">
                 <div className="flex items-center justify-between mb-10">
                   <h3 className="text-2xl font-display font-bold uppercase tracking-tight">Subscription</h3>
-                  <span className="bg-secondary text-background text-[10px] font-bold px-4 py-1 rounded-full uppercase tracking-widest shadow-lg shadow-secondary/20">
-                    {subscription?.plan_type || 'None'}
+                  <span className={cn(
+                    "bg-secondary text-background text-[10px] font-bold px-4 py-1 rounded-full uppercase tracking-widest shadow-lg shadow-secondary/20",
+                    subscription?.plan_type === 'free' && "bg-primary shadow-primary/20"
+                  )}>
+                    {subscription?.plan_type === 'yearly' ? 'Sovereign' : subscription?.plan_type === 'monthly' ? 'Elite' : (subscription?.plan_type === 'free' ? 'Spectator' : 'None')}
                   </span>
                 </div>
                 
@@ -490,7 +505,7 @@ const DashboardOverview: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {featuredCharities.map((charity, idx) => (
+            {featuredCharities.length > 0 ? featuredCharities.map((charity, idx) => (
               <motion.div 
                 key={charity.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -520,7 +535,13 @@ const DashboardOverview: React.FC = () => {
                   </div>
                 </Link>
               </motion.div>
-            ))}
+            )) : (
+              <div className="col-span-full py-16 text-center">
+                <Heart className="w-12 h-12 text-on-surface-variant/20 mx-auto mb-4" />
+                <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">No featured partners yet</p>
+                <Link to="/charities" className="mt-4 inline-block text-primary text-[10px] font-bold uppercase tracking-widest hover:underline">Browse All Charities →</Link>
+              </div>
+            )}
           </div>
         </div>
       </div>

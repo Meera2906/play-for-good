@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Target, Calendar, MapPin, Plus, Trash2, Trophy, Loader2, AlertCircle, Lock, Activity } from 'lucide-react';
+import { Target, Calendar, MapPin, Plus, Trash2, Trophy, Loader2, AlertCircle, Lock, Activity, CheckCircle2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
@@ -22,8 +22,10 @@ type ScoreFormValues = z.infer<typeof scoreSchema>;
 
 const Scores: React.FC = () => {
   const { user } = useAuth();
-  const { isActive, loading: subLoading } = useSubscription();
+  const { isActive, isPremium, loading: subLoading } = useSubscription();
   const [scores, setScores] = useState<Score[]>([]);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,8 +63,8 @@ const Scores: React.FC = () => {
   };
 
   const onSubmit = async (formData: ScoreFormValues) => {
-    if (!isActive) {
-      setError('Active subscription required to submit scores.');
+    if (!isPremium) {
+      setError('Premium membership required to submit scores.');
       return;
     }
     setSubmitting(true);
@@ -112,8 +114,7 @@ const Scores: React.FC = () => {
   };
 
   const handleDelete = async (scoreId: string) => {
-    if (!window.confirm('Are you sure you want to delete this score?')) return;
-    
+    setDeletingId(scoreId);
     try {
       const { error } = await supabase
         .from('scores')
@@ -121,10 +122,12 @@ const Scores: React.FC = () => {
         .eq('id', scoreId);
 
       if (error) throw error;
+      setConfirmDeleteId(null);
       fetchScores();
     } catch (err: any) {
-      console.error('Failed to delete score:', err);
-      alert('Failed to delete score');
+      setError('Failed to delete score. Please try again.');
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -141,7 +144,7 @@ const Scores: React.FC = () => {
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-12">
+    <div className="max-w-5xl mx-auto p-4 md:p-8 lg:p-12">
       <div className="flex items-center gap-4 mb-4">
         <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center">
           <Target className="w-5 h-5 text-primary" />
@@ -156,7 +159,7 @@ const Scores: React.FC = () => {
         {/* Score Entry Form */}
         <div className="lg:col-span-1 space-y-8">
           <div className="glass-card p-8 bg-surface-container-high/30 relative overflow-hidden">
-            {!isActive && (
+            {!isPremium && (
               <div className="absolute inset-0 z-50 bg-background/60 backdrop-blur-sm flex items-center justify-center p-8 text-center border border-dashed border-primary/20">
                 <div className="flex flex-col items-center">
                   <Lock className="w-10 h-10 text-primary mb-4" />
@@ -186,7 +189,7 @@ const Scores: React.FC = () => {
                   <input
                     {...register('course_name')}
                     type="text"
-                    disabled={!isActive}
+                    disabled={!isPremium}
                     className="w-full bg-surface-container-low border border-white/5 rounded-xl py-3 pl-12 pr-4 text-sm focus:border-primary transition-colors outline-none disabled:opacity-30"
                     placeholder="E.g. St Andrews"
                   />
@@ -203,7 +206,7 @@ const Scores: React.FC = () => {
                   <input
                     {...register('date')}
                     type="date"
-                    disabled={!isActive}
+                    disabled={!isPremium}
                     className="w-full bg-surface-container-low border border-white/5 rounded-xl py-3 pl-12 pr-4 text-sm focus:border-primary transition-colors outline-none [color-scheme:dark] disabled:opacity-30"
                   />
                 </div>
@@ -221,7 +224,7 @@ const Scores: React.FC = () => {
                     type="number"
                     min="1"
                     max="45"
-                    disabled={!isActive}
+                    disabled={!isPremium}
                     className="w-full bg-surface-container-low border border-white/5 rounded-xl py-3 pl-12 pr-4 text-sm focus:border-primary transition-colors outline-none disabled:opacity-30"
                     placeholder="Points (1-45)"
                   />
@@ -231,7 +234,7 @@ const Scores: React.FC = () => {
 
               <button
                 type="submit"
-                disabled={submitting || !isActive}
+                disabled={submitting || !isPremium}
                 className="w-full py-4 rounded-xl bg-primary text-background font-bold uppercase tracking-[0.2em] text-[10px] transition-all hover:bg-primary/90 active:scale-95 disabled:opacity-50 flex items-center justify-center mt-4"
               >
                 {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Submit Score'}
@@ -321,13 +324,34 @@ const Scores: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                    <button
-                      onClick={() => handleDelete(score.id)}
-                      className="w-12 h-12 rounded-2xl bg-white/5 text-on-surface-variant hover:bg-red-500/20 hover:text-red-500 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 active:scale-90"
-                      title="Delete Score"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                      {confirmDeleteId === score.id ? (
+                        <>
+                          <button
+                            onClick={() => handleDelete(score.id)}
+                            disabled={deletingId === score.id}
+                            className="px-4 py-2 rounded-xl bg-red-500/20 text-red-500 text-[9px] font-bold uppercase tracking-widest hover:bg-red-500/30 transition-all disabled:opacity-50 flex items-center gap-2"
+                          >
+                            {deletingId === score.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+                            Confirm
+                          </button>
+                          <button
+                            onClick={() => setConfirmDeleteId(null)}
+                            className="px-4 py-2 rounded-xl bg-white/5 text-on-surface-variant text-[9px] font-bold uppercase tracking-widest hover:bg-white/10 transition-all"
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          onClick={() => setConfirmDeleteId(score.id)}
+                          className="w-12 h-12 rounded-2xl bg-white/5 text-on-surface-variant hover:bg-red-500/20 hover:text-red-500 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 active:scale-90"
+                          title="Delete Score"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      )}
+                    </div>
                   </motion.div>
                 ))}
               </div>
