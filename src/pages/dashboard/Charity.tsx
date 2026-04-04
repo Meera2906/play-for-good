@@ -16,7 +16,7 @@ import DonationModal from '../../components/charity/DonationModal';
 
 const CharitySelection: React.FC = () => {
   const { user, profile, refreshProfile } = useAuth();
-  const { subscription, updateCharityDetails, isActive, isPremium, loading: subLoading } = useSubscription();
+  const { subscription, updateCharityDetails, isPremium, loading: subLoading } = useSubscription();
   const [charities, setCharities] = useState<Charity[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -176,7 +176,7 @@ const CharitySelection: React.FC = () => {
                 <p className="text-on-surface-variant max-w-xl">Identity verified, but a premium subscription is required to persist impact preferences and initialize draw participation.</p>
               </div>
             </div>
-            <Link to="/dashboard/subscription" className="px-10 py-5 bg-secondary text-background rounded-full font-bold uppercase tracking-widest text-[10px] hover:scale-105 transition-all shadow-xl shadow-secondary/20 whitespace-nowrap">
+            <Link to="/dashboard/subscription" className="px-10 py-5 bg-secondary text-background rounded-full font-bold uppercase tracking-widest text-[10px] hover:scale-105 transition-all shadow-xl shadow-secondary/20 whitespace-nowrap text-center">
               Upgrade Access
             </Link>
           </div>
@@ -430,7 +430,7 @@ const CharitySelection: React.FC = () => {
                     )}
                   </div>
                   
-                  <div className="glass-card p-10 bg-gradient-to-br from-primary/10 to-transparent border-primary/20 group">
+                  <div className="glass-card p-10 bg-gradient-to-br from-primary/10 to-transparent border-primary/20 group mb-8">
                     <div className="flex items-center gap-6 mb-10">
                       <div className="w-14 h-14 bg-primary/20 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                         <Zap className="w-6 h-6 text-primary" />
@@ -444,11 +444,12 @@ const CharitySelection: React.FC = () => {
                     <button 
                       onClick={() => setIsDonationModalOpen(true)}
                       disabled={!selectedCharityId}
-                      className="w-full py-5 rounded-2xl border border-white/10 hover:bg-primary hover:text-background hover:border-transparent text-[10px] font-bold uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 disabled:opacity-30 active:scale-95"
+                      className="w-full py-5 rounded-2xl border border-white/10 hover:bg-primary hover:text-background hover:border-transparent text-[10px] font-bold uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 disabled:opacity-30 active:scale-95 mb-4"
                     >
                       <Heart className="w-4 h-4" /> One-time Contribution
                     </button>
                   </div>
+
                 </div>
               </div>
             </motion.div>
@@ -467,4 +468,3 @@ const Save = ({ className }: { className?: string }) => (
 );
 
 export default CharitySelection;
-

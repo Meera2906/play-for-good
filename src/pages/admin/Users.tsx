@@ -5,7 +5,7 @@ import {
   Mail, Calendar, Trophy, Zap,
   MoreVertical, Edit3, Trash2, ShieldCheck,
   UserCheck, UserMinus, AlertCircle, CheckCircle2,
-  Lock, Unlock
+  Lock, Unlock, CreditCard, ArrowRight, Star
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { cn, formatCurrency, formatDate } from '../../lib/utils';
@@ -18,6 +18,7 @@ const AdminUsers: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'user'>('all');
   const [selectedUserForScores, setSelectedUserForScores] = useState<any | null>(null);
+  const [selectedUserForSubscription, setSelectedUserForSubscription] = useState<any | null>(null);
 
   useEffect(() => {
     fetchUsers();
@@ -254,6 +255,13 @@ const AdminUsers: React.FC = () => {
                            >
                               <Edit3 className="w-4 h-4" />
                            </button>
+                           <button 
+                             onClick={() => setSelectedUserForSubscription(u)}
+                             className="w-10 h-10 bg-white/5 hover:bg-primary/20 hover:text-primary rounded-xl flex items-center justify-center transition-all border border-white/5"
+                             title="Manage Subscription"
+                           >
+                              <CreditCard className="w-4 h-4" />
+                           </button>
                        </div>
                     </td>
                   </tr>
@@ -271,7 +279,223 @@ const AdminUsers: React.FC = () => {
             onClose={() => setSelectedUserForScores(null)} 
           />
         )}
+        {selectedUserForSubscription && (
+          <ManageSubscriptionModal 
+            user={selectedUserForSubscription} 
+            onClose={() => setSelectedUserForSubscription(null)} 
+            onSuccess={fetchUsers}
+          />
+        )}
       </AnimatePresence>
+    </div>
+  );
+};
+
+interface ManageSubscriptionModalProps {
+  user: any;
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+const ManageSubscriptionModal: React.FC<ManageSubscriptionModalProps> = ({ user, onClose, onSuccess }) => {
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  
+  const sub = Array.isArray(user.subscription) ? user.subscription[0] : user.subscription;
+
+  const handleUpdate = async (planType: 'monthly' | 'yearly' | 'cancel') => {
+    setLoading(true);
+    setMessage(null);
+    try {
+      if (planType === 'cancel') {
+        // Deactivate
+        if (sub) {
+          const { error: subError } = await supabase
+            .from('subscriptions')
+            .update({ 
+               status: 'cancelled'
+            })
+            .eq('user_id', user.id);
+          if (subError) throw subError;
+        }
+
+        const { data: profData, error: profError } = await supabase
+          .from('profiles')
+          .update({ 
+            subscription_status: 'cancelled',
+            subscription_tier: 'none'
+          })
+          .eq('id', user.id)
+          .select();
+
+        if (profError) throw profError;
+        if (!profData || profData.length === 0) {
+          throw new Error('Administrative override denied. Please check RLS policies.');
+        }
+
+      } else {
+        // Upgrade
+        const amount = planType === 'monthly' ? 25 : 250;
+        const renewalDate = new Date();
+        if (planType === 'monthly') renewalDate.setMonth(renewalDate.getMonth() + 1);
+        else renewalDate.setFullYear(renewalDate.getFullYear() + 1);
+
+        if (sub) {
+          // Update existing
+          const { error: subError } = await supabase
+            .from('subscriptions')
+            .update({
+              status: 'active',
+              plan_type: planType,
+              amount,
+              renewal_date: renewalDate.toISOString()
+            })
+            .eq('user_id', user.id);
+          if (subError) throw subError;
+        } else {
+          // Create new
+          const { error: subError } = await supabase
+            .from('subscriptions')
+            .insert({
+              user_id: user.id,
+              status: 'active',
+              plan_type: planType,
+              amount,
+              renewal_date: renewalDate.toISOString()
+            });
+          if (subError) throw subError;
+        }
+
+        const { data: profData, error: profError } = await supabase
+          .from('profiles')
+          .update({ 
+            subscription_status: 'active',
+            subscription_tier: planType
+          })
+          .eq('id', user.id)
+          .select();
+
+        if (profError) throw profError;
+        if (!profData || profData.length === 0) {
+          throw new Error('Administrative override denied. Please check RLS policies.');
+        }
+      }
+
+      setMessage({ type: 'success', text: `Protocol updated: ${planType === 'cancel' ? 'Deactivated' : 'Upgraded to ' + planType}` });
+      setTimeout(() => {
+        onSuccess();
+        onClose();
+      }, 1500);
+    } catch (error: any) {
+      console.error('Admin sub update error:', error);
+      setMessage({ type: 'error', text: error.message || 'Operation failed' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="absolute inset-0 bg-background/80 backdrop-blur-md"
+      />
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+        className="relative glass-card p-12 max-w-lg w-full"
+      >
+        <button 
+          onClick={onClose}
+          className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
+        >
+          <ArrowRight className="w-4 h-4 rotate-45" />
+        </button>
+
+        <div className="mb-10">
+          <div className="w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center mb-6">
+            <CreditCard className="w-8 h-8 text-primary" />
+          </div>
+          <h3 className="text-3xl font-display font-black uppercase tracking-tight mb-2">Member protocol</h3>
+          <p className="text-on-surface-variant text-sm font-sans">Administrative override for user: <span className="text-on-surface font-bold">{user.full_name}</span></p>
+        </div>
+
+        <div className="space-y-8">
+           {/* Current Status Preview */}
+           <div className="p-6 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between">
+              <div>
+                 <p className="text-[8px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">Current Standing</p>
+                 <p className="text-lg font-display font-bold uppercase text-primary italic">
+                    {sub?.plan_type || 'Spectator'} Node
+                 </p>
+              </div>
+              <div className={cn(
+                 "px-4 py-1.5 rounded-full text-[8px] font-bold uppercase tracking-widest",
+                 sub?.status === 'active' ? "bg-primary/20 text-primary" : "bg-white/10 text-on-surface-variant"
+              )}>
+                 {sub?.status || 'Unknown'}
+              </div>
+           </div>
+
+           <div className="grid grid-cols-2 gap-4">
+              <button 
+                onClick={() => handleUpdate('monthly')}
+                disabled={loading}
+                className="flex flex-col items-start gap-4 p-6 rounded-3xl bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-all group disabled:opacity-50"
+              >
+                 <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Zap className="w-5 h-5 text-primary" />
+                 </div>
+                 <div>
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-primary block mb-1">Elite Upgrade</span>
+                    <span className="text-xl font-display font-black">£25.00</span>
+                 </div>
+              </button>
+              
+              <button 
+                onClick={() => handleUpdate('yearly')}
+                disabled={loading}
+                className="flex flex-col items-start gap-4 p-6 rounded-3xl bg-secondary/10 border border-secondary/20 hover:bg-secondary/20 transition-all group disabled:opacity-50"
+              >
+                 <div className="w-10 h-10 rounded-xl bg-secondary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Star className="w-5 h-5 text-secondary" />
+                 </div>
+                 <div>
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-secondary block mb-1">Sovereign Upgrade</span>
+                    <span className="text-xl font-display font-black">£250.00</span>
+                 </div>
+              </button>
+           </div>
+
+           {(sub?.status === 'active' || user.is_premium) && (
+              <button 
+                onClick={() => handleUpdate('cancel')}
+                disabled={loading}
+                className="w-full py-5 rounded-2xl bg-red-500/10 text-red-500 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-red-500/20 transition-all active:scale-95 flex items-center justify-center gap-3 disabled:opacity-50"
+              >
+                <AlertCircle className="w-4 h-4" /> Deactivate Protocol connection
+              </button>
+           )}
+
+           {message && (
+             <motion.div 
+               initial={{ opacity: 0, y: 10 }}
+               animate={{ opacity: 1, y: 0 }}
+               className={cn(
+                 "p-4 rounded-xl flex items-center gap-3 text-xs font-sans",
+                 message.type === 'success' ? "bg-primary/10 text-primary border border-primary/20" : "bg-red-500/10 text-red-500 border border-red-500/20"
+               )}
+             >
+                {message.type === 'success' ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                <p>{message.text}</p>
+             </motion.div>
+           )}
+        </div>
+      </motion.div>
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ShieldCheck, Zap, CreditCard, ArrowRight, Loader2, Star, Calendar, Heart, Award } from 'lucide-react';
+import { ShieldCheck, Zap, CreditCard, ArrowRight, Loader2, Star, Calendar, Heart, Award, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../components/auth/AuthProvider';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import { useSubscription } from '../../hooks/useSubscription';
@@ -18,6 +18,7 @@ const Subscription: React.FC = () => {
     createCheckoutSession, 
     createPortalSession,
     activateMembership,
+    cancelMembership,
     isActive,
     isPremium
   } = useSubscription();
@@ -25,6 +26,8 @@ const Subscription: React.FC = () => {
   const [processing, setProcessing] = React.useState<string | null>(null);
   const [selectedPlan, setSelectedPlan] = React.useState<{type: 'monthly' | 'yearly', price: number} | null>(null);
   const [charities, setCharities] = React.useState<Charity[]>([]);
+  const [showCancelConfirm, setShowCancelConfirm] = React.useState(false);
+  const [cancelling, setCancelling] = React.useState(false);
 
   React.useEffect(() => {
     const fetchCharities = async () => {
@@ -52,6 +55,18 @@ const Subscription: React.FC = () => {
       console.error(err);
     } finally {
       setProcessing(null);
+    }
+  };
+
+  const handleCancel = async () => {
+    setCancelling(true);
+    try {
+      await cancelMembership();
+      setShowCancelConfirm(false);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setCancelling(false);
     }
   };
 
@@ -150,13 +165,54 @@ const Subscription: React.FC = () => {
                     <button 
                       onClick={handleManage}
                       disabled={!!processing}
-                      className="w-full py-5 rounded-2xl bg-white/5 border border-white/10 text-on-surface font-bold uppercase tracking-[0.2em] text-[10px] transition-all hover:bg-white/10 active:scale-95 flex items-center justify-center gap-4 disabled:opacity-50 group"
+                      className="w-full py-5 rounded-2xl bg-white/5 border border-white/10 text-on-surface font-bold uppercase tracking-[0.2em] text-[10px] transition-all hover:bg-white/10 active:scale-95 flex items-center justify-center gap-4 disabled:opacity-50 group mb-4"
                     >
                       {processing === 'portal' ? <Loader2 className="w-4 h-4 animate-spin" /> : <CreditCard className="w-4 h-4" />} 
                       Manage Billing Nodes
                     </button>
+
+                    {isPremium && (
+                      <button 
+                        onClick={() => setShowCancelConfirm(true)}
+                        className="w-full py-4 rounded-xl text-red-500/50 text-[9px] font-bold uppercase tracking-widest hover:text-red-500 transition-all flex items-center justify-center gap-2"
+                      >
+                         Deactivate Membership Protocol
+                      </button>
+                    )}
                   </div>
                 </div>
+
+                {/* Inline Upgrade Options if not Sovereign */}
+                {subscription?.plan_type !== 'yearly' && (
+                  <div className="mt-12 pt-12 border-t border-white/5">
+                    <h3 className="text-xl font-display font-black uppercase tracking-tight mb-8">Available Level-Up Nodes</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                       {subscription?.plan_type === 'free' && (
+                         <div 
+                           onClick={() => setSelectedPlan({type: 'monthly', price: 25})}
+                           className="glass-card p-8 bg-primary/5 border border-primary/20 cursor-pointer hover:bg-primary/10 transition-all flex items-center justify-between group"
+                         >
+                            <div>
+                               <span className="text-[10px] font-black uppercase text-primary block mb-1">Elite Node</span>
+                               <span className="text-2xl font-display font-black tracking-tight italic">£25 <span className="text-xs font-sans not-italic text-on-surface-variant">/ MO</span></span>
+                            </div>
+                            <Zap className="w-8 h-8 text-primary group-hover:scale-110 transition-transform" />
+                         </div>
+                       )}
+                       
+                       <div 
+                         onClick={() => setSelectedPlan({type: 'yearly', price: 240})}
+                         className="glass-card p-8 bg-secondary/5 border border-secondary/20 cursor-pointer hover:bg-secondary/10 transition-all flex items-center justify-between group"
+                       >
+                          <div>
+                             <span className="text-[10px] font-black uppercase text-secondary block mb-1">Sovereign Node</span>
+                             <span className="text-2xl font-display font-black tracking-tight italic">£240 <span className="text-xs font-sans not-italic text-on-surface-variant">/ YR</span></span>
+                          </div>
+                          <Star className="w-8 h-8 text-secondary group-hover:scale-110 transition-transform" />
+                       </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ) : (
@@ -283,6 +339,50 @@ const Subscription: React.FC = () => {
         amount={selectedPlan?.price || 0}
         selectedCharity={activeCharity}
       />
+
+      {/* Cancellation Modal */}
+      <AnimatePresence>
+        {showCancelConfirm && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
+             <motion.div 
+               initial={{ opacity: 0 }}
+               animate={{ opacity: 1 }}
+               exit={{ opacity: 0 }}
+               onClick={() => setShowCancelConfirm(false)}
+               className="absolute inset-0 bg-background/80 backdrop-blur-md"
+             />
+             <motion.div 
+               initial={{ opacity: 0, scale: 0.9, y: 20 }}
+               animate={{ opacity: 1, scale: 1, y: 0 }}
+               exit={{ opacity: 0, scale: 0.9, y: 20 }}
+               className="relative glass-card p-12 max-w-sm w-full text-center shadow-[0_0_100px_rgba(0,0,0,0.5)]"
+             >
+                <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_40px_rgba(239,68,68,0.2)]">
+                   <AlertCircle className="w-10 h-10 text-red-500" />
+                </div>
+                <h3 className="text-3xl font-display font-black uppercase mb-4 tracking-tight">System Deactivation</h3>
+                <p className="text-sm text-on-surface-variant font-sans leading-relaxed mb-10">
+                   Terminating your Elite protocol connection will immediately lock your access to draw participation and winnings accrual. Your historical impact progress will be archived.
+                </p>
+                <div className="space-y-4">
+                  <button 
+                    onClick={handleCancel}
+                    disabled={cancelling}
+                    className="w-full py-5 rounded-2xl bg-red-500 text-white font-bold uppercase tracking-widest text-[10px] hover:scale-105 transition-all shadow-xl shadow-red-500/20 disabled:opacity-50"
+                  >
+                    {cancelling ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Confirm Deactivation'}
+                  </button>
+                  <button 
+                    onClick={() => setShowCancelConfirm(false)}
+                    className="w-full py-5 rounded-2xl bg-white/5 border border-white/10 text-on-surface font-bold uppercase tracking-widest text-[10px] hover:bg-white/10 transition-all"
+                  >
+                    Abort Protocol
+                  </button>
+                </div>
+             </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
