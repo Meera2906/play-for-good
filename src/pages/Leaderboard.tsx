@@ -69,11 +69,11 @@ const Leaderboard: React.FC = () => {
           </div>
           <h1 className="text-7xl md:text-9xl font-display font-black uppercase tracking-tighter leading-[0.8] mb-12">
             The <br />
-            <span className="text-secondary italic">Leaderboard.</span>
+            <span className="text-primary italic">Leaderboard.</span>
           </h1>
           <div className="flex flex-col md:flex-row md:items-center gap-8">
             <div className="flex items-center gap-3 bg-white/5 px-6 py-2 rounded-full border border-white/10">
-              <Trophy className="w-4 h-4 text-secondary" />
+              <Trophy className="w-4 h-4 text-primary" />
               <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Elite Performance Rankings</span>
             </div>
             <p className="text-on-surface-variant text-xl font-sans max-w-2xl leading-relaxed">
@@ -126,7 +126,7 @@ const Leaderboard: React.FC = () => {
                         <span className="text-6xl font-display font-black text-primary">{l.full_name?.[0] || '?' }</span>
                         <div className={cn(
                           "absolute -bottom-3 -right-3 w-14 h-14 rounded-2xl flex items-center justify-center border border-white/10 shadow-2xl",
-                          isFirst ? "bg-secondary text-background" : "bg-white/5 text-on-surface"
+                          isFirst ? "bg-primary text-background" : "bg-white/5 text-on-surface"
                         )}>
                           {isFirst ? <Trophy className="w-7 h-7" /> : <span className="font-black text-xl">{leaderIdx + 1}</span>}
                         </div>
@@ -134,7 +134,7 @@ const Leaderboard: React.FC = () => {
                       
                       <h3 className="text-3xl font-display font-bold uppercase mb-2 tracking-tight">{l.full_name || 'Anonymous User'}</h3>
                       <div className="flex flex-col items-center gap-2 mb-10">
-                        <p className="text-[10px] text-secondary font-bold uppercase tracking-[0.3em]">
+                        <p className="text-[10px] text-primary font-bold uppercase tracking-[0.3em]">
                           {l.avgPoints.toFixed(1)} Avg Points
                         </p>
                         {l.roundsCount < 5 && (
@@ -224,7 +224,7 @@ const Leaderboard: React.FC = () => {
                           </td>
                           <td className="px-10 py-8 text-right">
                             <div className="flex flex-col items-end">
-                              <p className="font-display font-black text-3xl text-secondary">{leader.avgPoints.toFixed(1)}</p>
+                              <p className="font-display font-black text-3xl text-primary">{leader.avgPoints.toFixed(1)}</p>
                               {leader.roundsCount < 5 && (
                                 <p className="text-[8px] font-bold uppercase tracking-widest text-on-surface-variant mt-1">
                                   Log {5 - leader.roundsCount} more for official status

@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Trophy, Zap, Play, CheckCircle2, 
-  AlertCircle, History, Calculator, 
+import {
+  Trophy, Zap, Play, CheckCircle2,
+  AlertCircle, History, Calculator,
   Users, Layers, ArrowRight, Loader2,
   RefreshCw, Database
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  calculateDrawResults, 
-  finalizeAndPublishDraw, 
-  getLatestRollover 
+import {
+  calculateDrawResults,
+  finalizeAndPublishDraw,
+  getLatestRollover
 } from '../../lib/draw';
 import { cn, formatCurrency } from '../../lib/utils';
 import type { Draw, Winner } from '../../types';
@@ -23,6 +23,8 @@ const AdminDraws: React.FC = () => {
   const [simulationResult, setSimulationResult] = useState<any>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [drawHistory, setDrawHistory] = useState<Draw[]>([]);
+  const [manualOverride, setManualOverride] = useState(false);
+  const [customNumbers, setCustomNumbers] = useState<string[]>(['', '', '', '', '']);
 
   useEffect(() => {
     loadMetaData();
@@ -31,7 +33,7 @@ const AdminDraws: React.FC = () => {
   const loadMetaData = async () => {
     const roll = await getLatestRollover();
     setRollover(roll);
-    
+
     // Load history
     const { data } = await supabase
       .from('draws')
@@ -45,7 +47,10 @@ const AdminDraws: React.FC = () => {
     setIsSimulating(true);
     setMessage(null);
     try {
-      const results = await calculateDrawResults(mode);
+      const numericCustom = customNumbers.map(n => parseInt(n)).filter(n => !isNaN(n));
+      const finalCustom = (manualOverride && numericCustom.length === 5) ? numericCustom : undefined;
+
+      const results = await calculateDrawResults(mode, finalCustom);
       setSimulationResult(results);
     } catch (err: any) {
       console.error(err);
@@ -115,24 +120,24 @@ const AdminDraws: React.FC = () => {
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant mb-6">Draw Mode</p>
                 <div className="grid grid-cols-2 gap-4">
-                  <button 
+                  <button
                     onClick={() => setMode('random')}
                     className={cn(
                       "py-6 rounded-2xl border transition-all flex flex-col items-center gap-3",
-                      mode === 'random' 
-                        ? "bg-primary/20 border-primary text-primary" 
+                      mode === 'random'
+                        ? "bg-primary/20 border-primary text-primary"
                         : "bg-surface-container-high border-white/5 text-on-surface-variant hover:bg-white/5"
                     )}
                   >
                     <RefreshCw className="w-5 h-5" />
                     <span className="text-[10px] font-bold uppercase tracking-widest">Random</span>
                   </button>
-                  <button 
+                  <button
                     onClick={() => setMode('algorithmic')}
                     className={cn(
                       "py-6 rounded-2xl border transition-all flex flex-col items-center gap-3",
-                      mode === 'algorithmic' 
-                        ? "bg-secondary/20 border-secondary text-secondary" 
+                      mode === 'algorithmic'
+                        ? "bg-secondary/20 border-secondary text-secondary"
                         : "bg-surface-container-high border-white/5 text-on-surface-variant hover:bg-white/5"
                     )}
                   >
@@ -140,6 +145,47 @@ const AdminDraws: React.FC = () => {
                     <span className="text-[10px] font-bold uppercase tracking-widest">Algorithmic</span>
                   </button>
                 </div>
+              </div>
+
+              {/* Manual Override Option */}
+              <div className="space-y-6 pt-4 border-t border-white/5">
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant">Manual Matrix Override</p>
+                  <button
+                    onClick={() => setManualOverride(!manualOverride)}
+                    className={cn(
+                      "text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-md transition-all",
+                      manualOverride ? "bg-primary/20 text-primary border border-primary/30" : "bg-white/5 text-on-surface-variant border border-white/5"
+                    )}
+                  >
+                    {manualOverride ? 'ENABLED' : 'DISABLED'}
+                  </button>
+                </div>
+
+                {manualOverride && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="space-y-6"
+                  >
+                    <div className="grid grid-cols-5 gap-3">
+                      {customNumbers.map((num, i) => (
+                        <input
+                          key={i}
+                          type="number"
+                          value={num}
+                          onChange={(e) => {
+                            const newNums = [...customNumbers];
+                            newNums[i] = e.target.value;
+                            setCustomNumbers(newNums);
+                          }}
+                          className="bg-background/50 border border-white/10 rounded-lg py-3 text-center text-lg font-display font-bold focus:border-primary outline-none transition-all"
+                          placeholder="0"
+                        />
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
               </div>
 
               {/* Stats Preview */}
@@ -160,7 +206,7 @@ const AdminDraws: React.FC = () => {
               </div>
 
               <div className="space-y-4">
-                <button 
+                <button
                   onClick={handleSimulate}
                   disabled={isSimulating}
                   className="w-full py-6 rounded-2xl bg-white text-background font-bold uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-4 hover:scale-[1.02] active:scale-95 transition-all shadow-xl disabled:opacity-50"
@@ -169,7 +215,7 @@ const AdminDraws: React.FC = () => {
                   Simulate Matrix
                 </button>
                 {simulationResult && (
-                   <button 
+                  <button
                     onClick={handlePublish}
                     disabled={isPublishing}
                     className="w-full py-6 rounded-2xl bg-primary text-background font-bold uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-4 hover:scale-[1.02] active:scale-95 transition-all shadow-2xl shadow-primary/30 disabled:opacity-50"
@@ -184,7 +230,7 @@ const AdminDraws: React.FC = () => {
 
           {/* History */}
           <div className="glass-card p-10">
-             <h2 className="text-sm font-bold uppercase tracking-[0.2em] mb-10 flex items-center gap-3 text-on-surface-variant">
+            <h2 className="text-sm font-bold uppercase tracking-[0.2em] mb-10 flex items-center gap-3 text-on-surface-variant">
               <History className="w-4 h-4" /> Recent Protocols
             </h2>
             <div className="space-y-6">
@@ -222,7 +268,7 @@ const AdminDraws: React.FC = () => {
           )}
 
           {message && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               className={cn(
@@ -279,7 +325,7 @@ const AdminDraws: React.FC = () => {
                     <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-6">Eligible Entities</p>
                     <p className="text-4xl font-display font-bold tracking-tighter">{simulationResult.eligibleCount} <span className="text-lg text-on-surface-variant font-sans">/ {simulationResult.participantsCount}</span></p>
                   </div>
-                   <div className="glass-card p-10">
+                  <div className="glass-card p-10">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-6">Projected Rollover</p>
                     <p className={cn("text-4xl font-display font-bold tracking-tighter", simulationResult.newRollover > 0 ? "text-secondary" : "text-primary")}>
                       {formatCurrency(simulationResult.newRollover)}
@@ -291,8 +337,8 @@ const AdminDraws: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                   {[5, 4, 3].map(tier => {
                     const count = simulationResult.tierBreakdown[tier];
-                    const prizePerPerson = count > 0 
-                      ? (simulationResult.totalPool * (tier === 5 ? 0.4 : tier === 4 ? 0.35 : 0.25)) / count 
+                    const prizePerPerson = count > 0
+                      ? (simulationResult.totalPool * (tier === 5 ? 0.4 : tier === 4 ? 0.35 : 0.25)) / count
                       : 0;
 
                     return (
@@ -301,7 +347,7 @@ const AdminDraws: React.FC = () => {
                         tier === 5 ? "bg-secondary/10 border-secondary/30" : "bg-primary/10 border-primary/30"
                       )}>
                         <h4 className="text-lg font-bold uppercase tracking-tight mb-4 flex items-center justify-between">
-                          {tier}-Match Matrix 
+                          {tier}-Match Matrix
                           <span className="text-xs opacity-50">{tier === 5 ? '40%' : tier === 4 ? '35%' : '25%'}</span>
                         </h4>
                         <div className="space-y-2">
