@@ -71,13 +71,13 @@ const Home: React.FC = () => {
               <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 rounded-full blur opacity-50 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-pulse" />
               <div className="relative inline-flex items-center gap-4 px-6 py-2 rounded-full border border-white/10 bg-black/40 backdrop-blur-2xl w-fit shadow-[0_0_15px_rgba(78,222,163,0.1)]">
                 <div className="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_10px_rgba(78,222,163,0.8)]" />
-                <span className="font-sans text-[10px] font-bold uppercase tracking-[0.4em] text-primary">Activate The Mission</span>
+                <span className="font-sans text-[10px] font-bold uppercase tracking-[0.4em] text-secondary">Activate The Mission</span>
               </div>
             </div>
 
             <h1 className="font-display text-7xl md:text-[160px] leading-[0.85] font-black uppercase tracking-tighter max-w-6xl">
               Sovereign <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-on-surface to-secondary-container italic">Catalyst.</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-on-surface italic">Catalyst.</span>
             </h1>
 
             <p className="font-sans text-lg md:text-2xl text-on-surface-variant max-w-2xl leading-relaxed">
@@ -100,7 +100,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* Trust Stats */}
-      <section className="py-24 px-6 md:px-12 border-y border-white/5 bg-surface-container-lowest">
+      <section className="py-24 px-6 md:px-12 border-y border-white/5">
         <div className="max-w-[1920px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 text-center md:text-left">
           <div className="space-y-2">
             <p className="font-display text-7xl font-black text-secondary tracking-tighter">£2.4M</p>
